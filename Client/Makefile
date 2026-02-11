@@ -18,19 +18,19 @@ EXE_NAME = $(BUILD_DIR)/Client.out
 SOURCES = client.c myStringFunction.c paint.c
 OBJECTS = $(SOURCES:.c=.o)
 
-OBJECTS_IN_SOURCE = $(addprefix src/, $(OBJECTS))
+OBJECTS_IN_DIR = $(addprefix $(BUILD_DIR)/, $(OBJECTS))
 
 .PHONY: all clean
 
 all: $(EXE_NAME)
 
-$(EXE_NAME): makeBuild $(OBJECTS_IN_SOURCE)
-	$(CXX) $(FLAGS) $(addprefix ./$(BUILD_DIR)/, $(OBJECTS_IN_SOURCE)) -o $(EXE_NAME)
+$(EXE_NAME): makeBuild $(OBJECTS_IN_DIR)
+	$(CXX) $(FLAGS) $(OBJECTS_IN_DIR) -o $(EXE_NAME)
 
-$(OBJECTS_IN_SOURCE): %.o: %.c
-	$(CXX) $(FLAGS) -I ./include -c ./$^ -o ./$(BUILD_DIR)/$@
+$(BUILD_DIR)/%.o: src/%.c
+	$(CXX) $(FLAGS) -I ./include -c $< -o $@
 
 makeBuild:
-	mkdir -p ./$(BUILD_DIR)/src
+	mkdir -p ./$(BUILD_DIR)
 clean:
 	rm -rf ./$(BUILD_DIR)
