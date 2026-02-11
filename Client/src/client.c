@@ -11,16 +11,24 @@
 #include "paint.h"
 #include "myStringFunction.h"
 
-const size_t port = 27000;
+const size_t port = 27005;
 const size_t sizeOfBuffer = 1024;                       // size of buffer for read from descriptor
 const size_t maxIndexInBuffer = sizeOfBuffer - 1;
 const size_t standardShipping = 0;
-const char* ipAddress = "127.0.0.1";
 
 typedef struct sockaddr_in socketStruct;
 typedef struct sockaddr universalNetworkStruct;
 
-int main(){
+int main(int argc, char** argv){
+
+    char* ipAddress = NULL;
+    if( argc > 1 ){
+        ipAddress = argv[1];                      // 192.168.1.104
+    }
+    else{
+        colorPrintf( NOMODE, RED, "You don't write a ip address\n" );
+        return 0;
+    }
 
     int client_fd = socket( AF_INET, SOCK_STREAM, 0 );
     if( client_fd == -1 ){
@@ -47,12 +55,16 @@ int main(){
         colorPrintf( NOMODE, YELLOW, "Write message: " );
 
         size_t countOfBytes = sizeOfBuffer;
-        size_t messageLen = getlineWrapper( &buffer, &countOfBytes, stdin );
-
+        ssize_t messageLen = getlineWrapper( &buffer, &countOfBytes, stdin );
         send( client_fd, buffer, messageLen, standardShipping);
 
+        if( strcmp( "STOP", buffer ) == 0 ){
+            colorPrintf( NOMODE, YELLOW, "Client finish the chat\n" );
+            break;
+        }
+
         memset( buffer, 0, sizeOfBuffer );
-        int statusOfReading = recv( client_fd, buffer, sizeOfBuffer, 0 );
+        ssize_t statusOfReading = recv( client_fd, buffer, sizeOfBuffer, 0 );
         if( strcmp( "STOP", buffer ) == 0 ){
             colorPrintf( NOMODE, YELLOW, "Server finish the chat\n" );
             break;

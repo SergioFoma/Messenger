@@ -12,7 +12,7 @@
 #include "paint.h"
 #include "myStringFunction.h"
 
-const size_t port = 27000;                              // number of port, for console
+const size_t port = 27005;                              // number of port, for console
 const int backLog = 5;                                  // connection queue
 const size_t sizeOfBuffer = 1024;                       // size of buffer for read from descriptor
 const size_t maxIndexInBuffer = sizeOfBuffer - 1;
@@ -31,7 +31,7 @@ int main(){
         return 0;
     }
 
-    server_addr.sin_family = AF_INET;              // console
+    server_addr.sin_family = AF_INET;             // console
     server_addr.sin_port = htons(port);           // number of port
     server_addr.sin_addr.s_addr = INADDR_ANY;     // binding the socket to all network interfaces
 
@@ -69,20 +69,23 @@ int main(){
         if( statusOfRead == -1 ){
             colorPrintf( NOMODE, RED, "Error of read:%s, %s, %d\n", __func__, __FILE__, __LINE__ );
         }
-        colorPrintf( NOMODE, PURPLE, "Message from client: %s\n", buffer );
-
         if( strcmp( "STOP", buffer ) == 0 ){
-            colorPrintf( NOMODE, YELLOW, "Client left the chart\n" );
+            colorPrintf( NOMODE, YELLOW, "Client left the chat\n" );
             break;
         }
+        colorPrintf( NOMODE, PURPLE, "Message from client: %s\n", buffer );
+        colorPrintf( NOMODE, YELLOW, "Write message: " );
 
         memset( buffer, 0, sizeOfBuffer );
-
-        colorPrintf( NOMODE, YELLOW, "Write message: " );
 
         size_t countOfBytes = sizeOfBuffer;
         size_t messageLen = getlineWrapper( &buffer, &countOfBytes, stdin );
         write( client_fd, buffer, messageLen );
+        if( strcmp( "STOP", buffer ) == 0 ){
+            colorPrintf( NOMODE, YELLOW, "Server left the chat\n" );
+            break;
+        }
+
         memset( buffer, 0, maxIndexInBuffer );
     }
 
