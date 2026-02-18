@@ -13,7 +13,7 @@
 #include "myStringFunction.h"
 #include "client.h"
 
-const size_t port = 27007;
+const size_t port = 27008;
 const size_t sizeOfBuffer = 1024;                       // size of buffer for read from descriptor
 const size_t maxIndexInBuffer = sizeOfBuffer - 1;
 const size_t standardShipping = 0;
@@ -49,6 +49,7 @@ int main(int argc, char** argv){
         return 0;
     }
 
+    printInstruction();
     communicationWithServer( client_fd );
 
     close( client_fd );
@@ -65,12 +66,19 @@ struct sockaddr_in initServerStruct( char* ipAddress ){
     return server_addr;
 }
 
+void printInstruction(){
+    colorPrintf( NOMODE, YELLOW, "Hy! We are glad that you have chosen the Chumacera messenger for communication\n"
+                                 "In our messenger you can:\n"
+                                 "/join     -      join a chat/create a chat with friends\n"
+                                 "/list     -      get information about the chat you are in\n"
+                                 "/leave    -      leave the char\n"
+                                 "/stop     -      leave the messenger\n\n\n" );
+}
+
 void communicationWithServer( int client_fd ){
 
     char* buffer = (char*)calloc( sizeOfBuffer, sizeof( char ) );
     buffer[ maxIndexInBuffer ] = '\0';
-
-    registrationClient( client_fd, buffer );
 
     statusOfChat status = CONTINUE_CHAT;
     while( true ){
@@ -111,10 +119,7 @@ statusOfChat readMessageFromServer( int client_fd, char* buffer ){
         colorPrintf( NOMODE, RED, "Recv error:%s, %s, %d\n", __func__, __FILE__, __LINE__ );
         return STOP_CHAT;
     }
-    if( strcmp( "STOP", buffer ) == 0 ){
-        colorPrintf( NOMODE, YELLOW, "Interlocutor finish the chat\n" );
-        return STOP_CHAT;
-    }
+
     if( statusOfReading > 0 ){
         colorPrintf( NOMODE, PURPLE, "Message from server: %s\n", buffer );
     }
@@ -131,41 +136,10 @@ statusOfChat sendMessageForServer( int client_fd, char* buffer ){
 
     size_t bufferLenWithNullSymbol = strlen( buffer ) + 1;
     send( client_fd, buffer, bufferLenWithNullSymbol, standardShipping);
-    if( strcmp( "STOP", buffer ) == 0 ){
+    if( strcmp( "/stop", buffer ) == 0 ){
         colorPrintf( NOMODE, YELLOW, "Interlocutor finish the chat\n" );
         return STOP_CHAT;
     }
     memset( buffer, 0, sizeOfBuffer );
     return CONTINUE_CHAT;
-}
-
-void registrationClient( int client_fd, char* buffer ){
-    assert( buffer );
-
-    colorPrintf( NOMODE, BLUE, "Enter your ID: " );
-
-    size_t countOfBytes = sizeOfBuffer;
-    ssize_t messageLen = getlineWrapper( &buffer, &countOfBytes, stdin );
-    if( messageLen == -1 ){
-        colorPrintf( NOMODE, RED, "Error of getline:%s, %s, %d\n", __func__, __FILE__, __LINE__ );
-        return ;
-    }
-
-    send( client_fd, buffer, (size_t)messageLen, standardShipping);
-
-    memset( buffer, 0, sizeOfBuffer );
-
-    colorPrintf( NOMODE, BLUE, "Enter your interlocutor's ID: " );
-
-
-    countOfBytes = sizeOfBuffer;
-    messageLen = getlineWrapper( &buffer, &countOfBytes, stdin );
-    if( messageLen == -1 ){
-        colorPrintf( NOMODE, RED, "Error of getline:%s, %s, %d\n", __func__, __FILE__, __LINE__ );
-        return;
-    }
-
-    send( client_fd, buffer, (size_t)messageLen, standardShipping);
-
-    memset( buffer, 0, sizeOfBuffer );
 }
