@@ -9,7 +9,8 @@ enum codeError {
     CORRECT                         = 0,
     ROOMS_INITIALIZATION_ERROR      = 1,
     POLL_RET_BAD_VALUE              = 2,
-    ROOM_WAS_DESTROYED              = 3
+    ROOM_WAS_DESTROYED              = 3,
+    USERS_INITIALIZATION_ERROR      = 4
 };
 typedef enum codeError error;
 
@@ -57,11 +58,11 @@ void initializationUsersArray( room* currentRoom );
 
 error startWorkWithClients( int server_fd, roomsInfo* conditionOfTheRooms );
 
-void initializationPollStruct( pollFuncInfo* pollInformation, int server_fd );
+error initializationPollStruct( pollFuncInfo* pollInformation, int server_fd );
 
 bool initializationNewParticipant( pollFuncInfo* pollInformation, int server_fd, socketStruct* client_addr );
 
-void checkFreeMemoryAndReallocPollfd( pollFuncInfo* pollInformation );
+bool checkFreeMemoryAndReallocPollfd( pollFuncInfo* pollInformation );
 
 bool workWithOldParticipant( pollFuncInfo* pollInformation, roomsInfo* conditionOfTheRooms );
 
@@ -79,9 +80,9 @@ bool searchRoomForClient( int client_fd, char* nameOfRoom, roomsInfo* conditionO
 
 functionTypes leaveFromRoom( int client_fd, char* message, roomsInfo* conditionOfTheRooms );
 
-void checkFreeMemoryAndReallocRooms( roomsInfo* conditionOfTheRooms );
+bool checkFreeMemoryAndReallocRooms( roomsInfo* conditionOfTheRooms );
 
-void checkFreeMemoryAndReallocUsersFd( room* currentRoom );
+bool checkFreeMemoryAndReallocUsersFd( room* currentRoom );
 
 functionTypes getRoomList( int client_fd, char* message, roomsInfo* conditionOfTheRooms );
 

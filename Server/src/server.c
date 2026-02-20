@@ -17,7 +17,7 @@
 #include "serverCommand.h"
 
 const size_t port = 27008;                              // number of port, for console
-const int backLog = 2;                                  // connection queue
+const int backLog = 10;                                  // connection queue
 const size_t countOfRoomsForInitialization = 10;
 const size_t countOfUsersInRoomForInitialization = 2;
 const int noTime = -1;                                 // for poll
@@ -83,7 +83,7 @@ void initializationRoomsArrray( roomsInfo* conditionOfTheRooms ){
     conditionOfTheRooms->rooms = (room*)calloc( countOfRoomsForInitialization, sizeof(room) );
     conditionOfTheRooms->roomsError = CORRECT;
 
-    if( ! conditionOfTheRooms->rooms ){
+    if( conditionOfTheRooms->rooms == NULL ){
         conditionOfTheRooms->roomsError = ROOMS_INITIALIZATION_ERROR;
         return ;
     }
@@ -95,6 +95,10 @@ void initializationRoomsArrray( roomsInfo* conditionOfTheRooms ){
         currentRoom->numberOfParticipantsInRoom = 0;
         currentRoom->sizeOfUsersArray = countOfUsersInRoomForInitialization;
         currentRoom->usersArray = (int*)calloc( countOfUsersInRoomForInitialization, sizeof(int) );
+        if( currentRoom->usersArray == NULL ){
+            conditionOfTheRooms->roomsError = USERS_INITIALIZATION_ERROR;
+            return ;
+        }
         initializationUsersArray( currentRoom );
     }
 }
@@ -113,14 +117,19 @@ error startWorkWithClients( int server_fd, roomsInfo* conditionOfTheRooms ){
     assert( conditionOfTheRooms );
 
     pollFuncInfo pollInformation = {};
-    initializationPollStruct( &pollInformation, server_fd );
-    socketStruct client_addr = {};
+    error checkInitStruct = CORRECT;
+    if( ( checkInitStruct = initializationPollStruct( &pollInformation, server_fd ) ) != CORRECT ){
+        colorPrintf( NOMODE, RED, "Error of initialization poll struct:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return checkInitStruct;
+    }
 
+    socketStruct client_addr = {};
     int returnFromPoll = 0;
     while( true ){
 
         returnFromPoll = poll( pollInformation.participants, pollInformation.freeIndexNow, noTime  );
         if( returnFromPoll < 0 ){
+            colorPrintf( NOMODE, RED, "Poll return negative value:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
             return POLL_RET_BAD_VALUE;
         }
         else{
@@ -133,14 +142,18 @@ error startWorkWithClients( int server_fd, roomsInfo* conditionOfTheRooms ){
     return CORRECT;
 }
 
-void initializationPollStruct( pollFuncInfo* pollInformation, int server_fd ){
+error initializationPollStruct( pollFuncInfo* pollInformation, int server_fd ){
     assert( pollInformation );
 
     pollInformation->participants = (struct pollfd*)calloc( countOfUsersInRoomForInitialization, sizeof(struct pollfd) );
+    if( pollInformation->participants == NULL ){
+        return USERS_INITIALIZATION_ERROR;
+    }
     pollInformation->capacity = countOfUsersInRoomForInitialization;
     pollInformation->participants[0].fd = server_fd;
     pollInformation->participants[0].events = POLLIN;
     pollInformation->freeIndexNow = 1;
+    return CORRECT;
 }
 
 bool initializationNewParticipant( pollFuncInfo* pollInformation, int server_fd, socketStruct* client_addr ){
@@ -151,14 +164,17 @@ bool initializationNewParticipant( pollFuncInfo* pollInformation, int server_fd,
         return false;
     }
 
-    socklen_t clientSize = sizeof(client_addr);
+    socklen_t clientSize = sizeof(*client_addr);
     int client_fd = accept( server_fd, (universalNetworkStruct*)client_addr, &clientSize );
     if( client_fd < 0 ){
         colorPrintf( NOMODE, RED, "Error of accept client:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
         return false;
     }
+    if( checkFreeMemoryAndReallocPollfd( pollInformation ) == false ){
+        colorPrintf( NOMODE, RED, "Error of realloc poll array with fd:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return false;
+    }
 
-    checkFreeMemoryAndReallocPollfd( pollInformation );
     pollInformation->participants[pollInformation->freeIndexNow].fd = client_fd;
     pollInformation->participants[pollInformation->freeIndexNow].events = POLLIN;
     ++(pollInformation->freeIndexNow);
@@ -167,13 +183,17 @@ bool initializationNewParticipant( pollFuncInfo* pollInformation, int server_fd,
     return true;
 }
 
-void checkFreeMemoryAndReallocPollfd( pollFuncInfo* pollInformation ){
+bool checkFreeMemoryAndReallocPollfd( pollFuncInfo* pollInformation ){
     assert( pollInformation );
 
     if( pollInformation->freeIndexNow == pollInformation->capacity - 1 ){
         pollInformation->capacity *= 2;
         pollInformation->participants = (struct pollfd*)realloc( pollInformation->participants, pollInformation->capacity * sizeof(struct pollfd) );
     }
+    if( pollInformation->participants == NULL ){
+        return false;
+    }
+    return true;
 }
 
 bool workWithOldParticipant( pollFuncInfo* pollInformation, roomsInfo* conditionOfTheRooms ){
@@ -182,6 +202,10 @@ bool workWithOldParticipant( pollFuncInfo* pollInformation, roomsInfo* condition
     functionTypes whatFunction = NO_FUNCTION;
     size_t userIndex = 1;
     char* message = (char*)calloc( bytesForMessage, sizeof(char) );
+    if( message == NULL ){
+        colorPrintf( NOMODE, RED, "Error of initialization message:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return false;
+    }
 
     for( ; userIndex < pollInformation->freeIndexNow; userIndex++ ){
         if( pollInformation->participants[userIndex].revents == POLLIN ){
@@ -237,17 +261,27 @@ functionTypes joinToRoom( int client_fd, char* message, roomsInfo* conditionOfTh
 
     char* whitespace = strchr( message, ' ' );
     char* nameOfRoom = (char*)calloc( bytesForMessage, sizeof(char) );
+    if( nameOfRoom == NULL ){
+        colorPrintf( NOMODE, RED, "Error of calloc nameOfRoom:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return JOIN_CHAT;
+    }
+
     strncpy(nameOfRoom, whitespace + 1, bytesForMessage - 1);
     colorPrintf( NOMODE, GREEN, "Client %d joined to room %s\n", client_fd, nameOfRoom );
-
     if( searchRoomForClient( client_fd, nameOfRoom, conditionOfTheRooms ) ){
         free( nameOfRoom );
         return JOIN_CHAT;
     }
 
-    checkFreeMemoryAndReallocRooms( conditionOfTheRooms );
+    if( checkFreeMemoryAndReallocRooms( conditionOfTheRooms ) == false ){
+        colorPrintf( NOMODE, RED, "Error of realloc rooms array:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return JOIN_CHAT;
+    }
     room* currentRoom = &(conditionOfTheRooms->rooms[conditionOfTheRooms->currentFreeRoom]);
-    checkFreeMemoryAndReallocUsersFd( currentRoom );
+    if( checkFreeMemoryAndReallocUsersFd( currentRoom ) == false ){
+        colorPrintf( NOMODE, RED, "Error of realloc users array:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return JOIN_CHAT;
+    }
 
     currentRoom->roomName = nameOfRoom;
     currentRoom->usersArray[currentRoom->numberOfParticipantsInRoom] = client_fd;
@@ -270,7 +304,7 @@ functionTypes leaveFromRoom( int client_fd, char* message, roomsInfo* conditionO
 
     for( ; roomIndex < conditionOfTheRooms->currentFreeRoom; roomIndex++ ){
         room* currentRoom = &( conditionOfTheRooms->rooms[roomIndex] );
-        for( ; userIndex < currentRoom->numberOfParticipantsInRoom; userIndex++ ){
+        for( userIndex = 0; userIndex < currentRoom->numberOfParticipantsInRoom; userIndex++ ){
 
             if( client_fd == currentRoom->usersArray[userIndex] ){
                 currentRoom->usersArray[userIndex] = userNotConnected;
@@ -298,24 +332,31 @@ bool searchRoomForClient( int client_fd, char* nameOfRoom, roomsInfo* conditionO
     return false;
 }
 
-void checkFreeMemoryAndReallocRooms( roomsInfo* conditionOfTheRooms ){
+bool checkFreeMemoryAndReallocRooms( roomsInfo* conditionOfTheRooms ){
     assert( conditionOfTheRooms );
 
     if( conditionOfTheRooms->currentFreeRoom == conditionOfTheRooms->countOfRooms - 1 ){
         conditionOfTheRooms->countOfRooms *= 2;
         conditionOfTheRooms->rooms = (room*)realloc( conditionOfTheRooms->rooms, conditionOfTheRooms->countOfRooms * sizeof(room) );
     }
+    if( conditionOfTheRooms->rooms == NULL ){
+        return false;
+    }
+    return true;
 }
 
-void checkFreeMemoryAndReallocUsersFd( room* currentRoom ){
+bool checkFreeMemoryAndReallocUsersFd( room* currentRoom ){
     assert( currentRoom );
 
     if( currentRoom->numberOfParticipantsInRoom == currentRoom->sizeOfUsersArray - 1 ){
         currentRoom->sizeOfUsersArray *= 2;
         currentRoom->usersArray = (int*)realloc( currentRoom->usersArray, currentRoom->sizeOfUsersArray * sizeof(int) );
     }
+    if( currentRoom->usersArray == NULL ){
+        return false;
+    }
+    return true;
 }
-
 
 functionTypes getRoomList( int client_fd, char* message, roomsInfo* conditionOfTheRooms ){
     assert( message );
@@ -326,7 +367,7 @@ functionTypes getRoomList( int client_fd, char* message, roomsInfo* conditionOfT
 
     for( ; roomIndex < conditionOfTheRooms->currentFreeRoom; roomIndex++ ){
         room* currentRoom = &( conditionOfTheRooms->rooms[roomIndex] );
-        for( ; userIndex < currentRoom->numberOfParticipantsInRoom; userIndex++ ){
+        for( userIndex = 0; userIndex < currentRoom->numberOfParticipantsInRoom; userIndex++ ){
 
             if( client_fd == currentRoom->usersArray[userIndex] ){
                 dumpRoomInformation( client_fd, currentRoom );
@@ -345,8 +386,12 @@ void dumpRoomInformation( int client_fd, room* currentRoom ){
                             "Size of room: %lu\n\n\n";
     size_t roomInfoLen = strlen(roomInfo);
     char* bufferWithRoomInfo = (char*)calloc( roomInfoLen + 1, sizeof(char) );
-    bufferWithRoomInfo[ roomInfoLen - 1 ] = '\0';
+    if( bufferWithRoomInfo == NULL ){
+        colorPrintf( NOMODE, RED, "Error of calloc bufferWithRoomInfo:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return ;
+    }
 
+    bufferWithRoomInfo[ roomInfoLen - 1 ] = '\0';
     snprintf( bufferWithRoomInfo, roomInfoLen + 1, roomInfo,
               currentRoom->numberOfParticipantsInRoom, currentRoom->sizeOfUsersArray
             );
@@ -376,8 +421,6 @@ void writeSentenceInChat( int client_fd, char* message, roomsInfo* conditionOfTh
 
         write( roomWhereSitClient->usersArray[clientIndex], message, bytesForMessage );
     }
-
-
 }
 
 room* getRoom( int client_fd, roomsInfo* conditionOfTheRooms ){
@@ -388,7 +431,7 @@ room* getRoom( int client_fd, roomsInfo* conditionOfTheRooms ){
 
     for( ; roomIndex < conditionOfTheRooms->currentFreeRoom; roomIndex++ ){
         room* currentRoom = &( conditionOfTheRooms->rooms[roomIndex] );
-        for( ; userIndex < currentRoom->numberOfParticipantsInRoom; userIndex++ ){
+        for( userIndex = 0; userIndex < currentRoom->numberOfParticipantsInRoom; userIndex++ ){
 
             if( client_fd == currentRoom->usersArray[userIndex] ){
                 return currentRoom;

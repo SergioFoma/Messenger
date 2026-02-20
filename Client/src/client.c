@@ -78,8 +78,12 @@ void printInstruction(){
 void communicationWithServer( int client_fd ){
 
     char* buffer = (char*)calloc( sizeOfBuffer, sizeof( char ) );
+    if( buffer == NULL ){
+        colorPrintf( NOMODE, RED, "Error of initialization buffer:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
+        return ;
+    }
+    
     buffer[ maxIndexInBuffer ] = '\0';
-
     statusOfChat status = CONTINUE_CHAT;
     while( true ){
 
@@ -121,7 +125,7 @@ statusOfChat readMessageFromServer( int client_fd, char* buffer ){
     }
 
     if( statusOfReading > 0 ){
-        colorPrintf( NOMODE, PURPLE, "Message from server: %s\n", buffer );
+        colorPrintf( NOMODE, PURPLE, "Message from client: %s\n", buffer );
     }
     memset( buffer, 0, sizeOfBuffer );
     return CONTINUE_CHAT;
