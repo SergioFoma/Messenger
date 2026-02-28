@@ -2,6 +2,10 @@ CXX = g++
 
 BUILD_DIR = Build
 
+LIBUV_FLAGS = $(shell pkg-config --cflags libuv)
+LDLIBS = $(shell pkg-config --libs libuv)
+
+
 FLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations -Wc++14-compat \
 -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts -Wconditionally-supported -Wconversion -Wctor-dtor-privacy \
 -Wempty-body -Wfloat-equal -Wformat-nonliteral -Wformat-security -Wformat-signedness -Wformat=2 -Winline -Wlogical-op \
@@ -15,7 +19,7 @@ FLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop
 
 EXE_NAME = $(BUILD_DIR)/Server.out
 
-SOURCES = server.c myStringFunction.c paint.c serverCommand.c
+SOURCES = server.c string_function.c commands.c logging.c
 OBJECTS = $(SOURCES:.c=.o)
 
 OBJECTS_IN_DIR = $(addprefix $(BUILD_DIR)/, $(OBJECTS))
@@ -25,10 +29,10 @@ OBJECTS_IN_DIR = $(addprefix $(BUILD_DIR)/, $(OBJECTS))
 all: $(EXE_NAME)
 
 $(EXE_NAME): makeBuild $(OBJECTS_IN_DIR)
-	$(CXX) $(FLAGS) $(OBJECTS_IN_DIR) -o $(EXE_NAME)
+	$(CXX) $(FLAGS) $(LDLIBS) $(OBJECTS_IN_DIR) -o $(EXE_NAME)
 
 $(BUILD_DIR)/%.o: src/%.c
-	$(CXX) $(FLAGS) -I ./include -c $< -o $@
+	$(CXX) $(FLAGS) $(LIBUV_FLAGS) -I ./include -c $< -o $@
 
 makeBuild:
 	mkdir -p ./$(BUILD_DIR)

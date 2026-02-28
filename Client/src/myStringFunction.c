@@ -18,7 +18,7 @@ ssize_t getlineWrapper( char** line, size_t* n, FILE* stream ) {
     return sizeOfLine;
 }
 
-int cleanLine( char* lineForClean ){
+int clearLine( char* lineForClean ){
     if( lineForClean == NULL ){
         return -1;
     }
@@ -35,7 +35,7 @@ int cleanLine( char* lineForClean ){
     return 0;
 }
 
-void cleanBuffer(){
+void clearBuffer(){
     int symbol = '\0';
     while( ( symbol = getchar() ) != '\n' );
 }

@@ -13,7 +13,7 @@
 #include "myStringFunction.h"
 #include "client.h"
 
-const size_t port = 27008;
+const size_t port = 27009;
 const size_t sizeOfBuffer = 1024;                       // size of buffer for read from descriptor
 const size_t maxIndexInBuffer = sizeOfBuffer - 1;
 const size_t standardShipping = 0;
@@ -26,7 +26,7 @@ int main(int argc, char** argv){
 
     char* ipAddress = NULL;
     if( argc > 1 ){
-        ipAddress = argv[1];                      // 192.168.1.104
+        ipAddress = argv[1];                            // IP from console
     }
     else{
         colorPrintf( NOMODE, RED, "You don't write a ip address\n" );
@@ -82,7 +82,7 @@ void communicationWithServer( int client_fd ){
         colorPrintf( NOMODE, RED, "Error of initialization buffer:%s, %s, %d\n", __FILE__, __func__, __LINE__ );
         return ;
     }
-    
+
     buffer[ maxIndexInBuffer ] = '\0';
     statusOfChat status = CONTINUE_CHAT;
     while( true ){
