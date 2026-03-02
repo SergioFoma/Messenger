@@ -7,114 +7,114 @@
 #include "commands.h"
 #include "logging.h"
 
-const size_t one = 1;                                                               // for calloc
-const size_t max_command_size = 100;
-const size_t init_rooms_number = 10;                                                // for initialization array with rooms
-const size_t init_client_number = 10;                                               // for initialization array with clients
+const size_t ONE = 1;                                                               //for calloc
+const size_t INIT_ROOMS_NUMBER = 10;                                                //for initialization array with rooms
+const size_t INIT_CLIENT_NUMBER = 10;                                               //for initialization array with clients
+
+/*The array with commands is designed so that the length of commands increases,
+ *so the shortest length is the length of the first command( command_map[0] )
+*/
 
 const command_map_t command_map[] = {
     { "/join"   ,   cmd_join    },
     { "/list"   ,   cmd_list    },
-    { "/leave"  ,   cmd_leave   },
-    { "/stop"   ,   cmd_stop    }
+    { "/stop"   ,   cmd_stop    },
+    { "/leave"  ,   cmd_leave   }
 };
 const size_t command_map_capacity = sizeof(command_map) / sizeof(command_map_t);
+const size_t MIN_COMMAND_SIZE = strlen(command_map[0].command_name) - 1;
 
-data_rooms_t* rooms_info = NULL;                                                    // global struct
+// array of pointers to rooms and its size
+room_t** rooms = NULL;
+size_t room_capacity = 0;
 
 error init_rooms(){
 
-    rooms_info = (data_rooms_t*)calloc( one, sizeof(data_rooms_t) );
-    if( rooms_info == NULL ){
-        log_panic( "error initializing info about rooms" );
+    rooms = (room_t**)calloc( INIT_ROOMS_NUMBER, sizeof(room_t*) );                         //At the beginning, all pointers to rooms are null.
+    if( rooms == NULL ){
+        log_panic( "error initializing rooms array" );
         return MEMORY_ALLOC_ERR;
     }
-    rooms_info->rooms = (room_t*)calloc( init_rooms_number, sizeof(room_t) );
-    if( rooms_info->rooms == NULL ){
-        log_panic( "error initializing rooms" );
-        return MEMORY_ALLOC_ERR;
-
-    }
-    rooms_info->capacity = init_rooms_number;
-    rooms_info->free_room = 0;
-    rooms_info->room_errors = CORRECT;
-
-    error room_error = CORRECT;
-    size_t room_index = 0;
-    for( ; room_index < init_rooms_number; room_index++ ){
-
-        if( ( room_error = init_single_room( &(rooms_info->rooms[room_index]) ) ) != CORRECT ){
-            return room_error;
-        }
-    }
+    room_capacity = INIT_ROOMS_NUMBER;
     return CORRECT;
 }
 
-error init_single_room( room_t* room ){
+error init_single_room( room_t** room ){
     assert( room );
 
-    room->clients_array = (client_t**)calloc( init_client_number, sizeof(client_t*) );
-    if( room->clients_array == NULL ){
+    *room = (room_t*)calloc( ONE, sizeof(room_t) );
+    (*room)->clients_array = (client_t**)calloc( INIT_CLIENT_NUMBER, sizeof(client_t*) );      //At the beginning, all pointers to clients are null.
+    if( (*room)->clients_array == NULL ){
         log_panic( "error initializing clients in single room" );
         return MEMORY_ALLOC_ERR;
     }
-    room->capacity = init_client_number;
-    room->free_space = 0;
-    room->user_counter = 0;
-    room->room_name = NULL;
+    (*room)->capacity = INIT_CLIENT_NUMBER;
+    (*room)->user_counter = 0;
+    (*room)->room_name = NULL;
 
     return CORRECT;
 }
 
-error rooms_allocation(){
+ssize_t rooms_allocation( ssize_t room_index ){
 
-    if( rooms_info->free_room < rooms_info->capacity - 1 ){
-        return CORRECT;
+    if( room_index >= 0 ){
+        return room_index;
     }
 
-    rooms_info->capacity *= 2;
-    rooms_info->rooms = (room_t*)realloc( rooms_info->rooms, rooms_info->capacity * sizeof(room_t) );
-    if( rooms_info->rooms == NULL ){
-        log_panic( "room reallocate error" );
-        return MEMORY_ALLOC_ERR;
+    room_index = room_capacity;                                                                            // pointer to the first free space
+    room_capacity *= 2;
+    rooms = (room_t**)realloc( rooms, room_capacity * sizeof(room_t*) );                                      // realloc does not init data
+    if( rooms == NULL ){
+        log_panic( "room reallocation error" );
+        return -1;
     }
-    return CORRECT;
+
+    size_t current_room = room_index;
+    for( ; current_room < room_capacity; current_room++ ){
+        rooms[current_room] = NULL;
+    }
+    return room_index;
 }
 
-error clients_allocation( room_t* room ){
+ssize_t clients_allocation( room_t* room, ssize_t client_index ){
     assert( room );
 
-    if( room->free_space < room->capacity - 1 ){
-        return CORRECT;
+    if( client_index >= 0 ){
+        return client_index;
     }
 
+    client_index = room->capacity;                                                                         // pointer to the first free space
     room->capacity *= 2;
     room->clients_array = (client_t**)realloc( room->clients_array, room->capacity* sizeof(client_t*) );
     if( room->clients_array == NULL ){
         log_panic( "clients array reallocate error" );
-        return MEMORY_ALLOC_ERR;
+        return -1;
     }
-    return CORRECT;
+
+    client_t** clients_beginning = room->clients_array;
+    client_t** current_client = clients_beginning + client_index;
+    size_t new_capacity = room->capacity;
+    for( ; current_client < clients_beginning + new_capacity; current_client++ ){
+        *current_client = NULL;
+    }
+    return client_index;
 }
 
 void destroy_rooms(){
 
     size_t room_index = 0;
-    for( ; room_index < rooms_info->capacity; room_index++ ){
-        destroy_single_room( &(rooms_info->rooms[room_index]) );
+    for( ; room_index < room_capacity; room_index++ ){
+        destroy_single_room( rooms[room_index] );
+        rooms[room_index] = NULL;
     }
 
-    rooms_info->capacity = 0;
-    rooms_info->free_room = 0;
-    rooms_info->room_errors = CORRECT;
-    free( rooms_info );
+    free( rooms );
 }
 
 void destroy_single_room( room_t* room ){
     assert( room );
 
     room->capacity = 0;
-    room->free_space = 0;
     room->user_counter = 0;
     room->room_name = NULL;
     free( room->clients_array );
@@ -124,7 +124,7 @@ void destroy_single_room( room_t* room ){
 void connection_cb( uv_stream_t* server, int status ){
     assert( server );
 
-    client_t* client = (client_t*)calloc( one, sizeof(client_t) );
+    client_t* client = (client_t*)calloc( ONE, sizeof(client_t) );
     if( client == NULL ){
         log_error( "can not allocate memory for client" );
         return ;
@@ -136,7 +136,7 @@ void connection_cb( uv_stream_t* server, int status ){
     int accept_status = uv_accept( server, (uv_stream_t*)&client->handle );                              //communication between the client socket and the server socket
     if( accept_status < 0 ){
         log_error( "can not accept" );
-        uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( one, sizeof(uv_shutdown_t) );
+        uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
         uv_shutdown( shutdown_req, (uv_stream_t*)&client->handle, shutdown_cb );                         //closing connection
         return ;
     }
@@ -193,10 +193,10 @@ void removing_client( client_t* client ){
         return ;
     }
 
-    size_t client_index = 0;
+    client_t** clients_beginning = client_room->clients_array;
+    size_t clients_capacity = client_room->capacity;
     client_t** current_client = NULL;
-    for( ; client_index < client_room->free_space; client_index++ ){
-        current_client = &(client_room->clients_array[client_index]);
+    for( ; current_client < clients_beginning + clients_capacity; current_client++ ){
         if( *current_client == client ){
             free( client );
             *current_client = NULL;                                                                 //freeing up space in the room
@@ -237,7 +237,7 @@ void read_cb( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf ){
     }
 
     log_warning( "client closed connection" );
-    uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( one, sizeof(uv_shutdown_t) );
+    uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
     uv_shutdown( shutdown_req, handle, shutdown_cb );
 }
 
@@ -257,7 +257,7 @@ void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* cl
         if( buf_start[0] != '/' ){
             send_message( client, buf_start );
         }
-        else if(  newline_char - buf_start >= get_min_size() ){
+        else if(  newline_char - buf_start >= MIN_COMMAND_SIZE ){
             log_debug( "string from client: %s", buf_start );
             on_cmd( client, buf_start );
         }
@@ -270,20 +270,6 @@ void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* cl
     }
     client->len -= buf_start - client->buf;
     log_info( "string line after: %lu", client->len );
-}
-
-size_t get_min_size(){
-
-    size_t command_index = 0;
-    size_t min_size = max_command_size;
-    size_t current_size = 0;
-    for( ; command_index < command_map_capacity; command_index++ ){
-        current_size = strlen(command_map[command_index].command_name);
-        if( current_size < min_size ){
-            min_size = current_size;
-        }
-    }
-    return min_size;
 }
 
 void parse_command( client_t* client, const char* string ){
@@ -319,13 +305,14 @@ error send_message( client_t* client, const char* string ){
         return NULL_PTR;
     }
 
-    size_t client_index = 0;
-    for( ; client_index < client_room->free_space; client_index++ ){
-        client_t* current_client = client_room->clients_array[client_index];
-        if( !current_client || client == current_client || current_client->in_room == false ){               // sending a message to others client
+    size_t client_capacity = client_room->capacity;
+    client_t** client_beginning = client_room->clients_array;
+    client_t** current_client = client_beginning;
+    for( ; current_client < client_beginning + client_capacity; current_client++ ){
+        if( !(*current_client) || client == *current_client || (*current_client)->in_room == false ){               // sending a message to others client
             continue;
         }
-        client_send( client_room->clients_array[client_index], "%s\n", string );
+        client_send( *current_client, "%s\n", string );
     }
     return CORRECT;
 }
@@ -341,16 +328,17 @@ error cmd_join( client_t* client, const char* string ){
         return CORRECT;
     }
 
-    rooms_allocation();
-    room_t* free_room = &(rooms_info->rooms[rooms_info->free_room]);
-    clients_allocation( free_room );
+    ssize_t free_room_index = get_free_room();
+    free_room_index = rooms_allocation( free_room_index );
+    init_single_room( rooms + free_room_index );
 
-    free_room->room_name = strdup( name_begin );
+    ssize_t free_client_index = get_free_client( rooms[free_room_index] );
+    free_client_index = clients_allocation( rooms[free_room_index], free_client_index );
+
     client->in_room = true;
-    free_room->clients_array[free_room->free_space] = client;
-    ++(rooms_info->free_room);
-    ++(free_room->free_space);
-    ++(free_room->user_counter);
+    rooms[free_room_index]->room_name = strdup( name_begin );
+    rooms[free_room_index]->clients_array[free_client_index] = client;
+    ++(rooms[free_room_index]->user_counter);
     log_debug( "make new room and new client" );
     return CORRECT;
 }
@@ -360,18 +348,43 @@ bool room_search( client_t* client,  const char* room_name ){
     assert( room_name );
 
     size_t room_index = 0;
-    for( ; room_index < rooms_info->free_room; room_index++ ){
-        room_t* current_room = &(rooms_info->rooms[room_index]);
-        if( strcmp( room_name, current_room->room_name ) == 0 ){
-            clients_allocation( current_room );
+    room_t* current_room = NULL;
+    for( ; room_index < room_capacity; room_index++ ){
+        current_room = rooms[room_index];
+        if( current_room && strcmp( room_name, current_room->room_name ) == 0 ){
+            size_t free_client_index = get_free_client( current_room );
+            free_client_index = clients_allocation( current_room, free_client_index );
             client->in_room = true;
-            current_room->clients_array[current_room->free_space] = client;
-            ++(current_room->free_space);
+            current_room->clients_array[free_client_index] = client;
             ++(current_room->user_counter);
             return true;
         }
     }
     return false;
+}
+
+ssize_t get_free_room(){
+
+    size_t room_index = 0;
+    for( ; room_index < room_capacity; room_index++ ){
+        if( rooms[room_index] == NULL ){
+            return room_index;
+        }
+    }
+    return -1;
+}
+
+ssize_t get_free_client( room_t* room ){
+    assert( room );
+
+    size_t client_index = 0;
+    size_t clients_capacity = room->capacity;
+    for( ; client_index < clients_capacity; client_index++ ){
+        if( room->clients_array[client_index] == NULL ){
+            return client_index;
+        }
+    }
+    return -1;
 }
 
 error cmd_list( client_t* client, const char* string ){
@@ -405,13 +418,13 @@ error cmd_leave( client_t* client, const char* string ){
     }
 
     log_debug( "string in cmd_leave: %s", string );
-    client_t* current_client = NULL;
-    size_t client_index = 0;
-    for( ; client_index < client_room->free_space; client_index++ ){
-        current_client = client_room->clients_array[client_index];
-        if( current_client == client && current_client->in_room ){
-            client_room->clients_array[client_index]->in_room = false;
-            client_room->clients_array[client_index] = NULL;
+    size_t client_capacity = client_room->capacity;
+    client_t** beginning_client = client_room->clients_array;
+    client_t** current_client = beginning_client;
+    for( ; current_client < beginning_client + client_capacity; current_client++ ){
+        if( *current_client && *current_client == client && (*current_client)->in_room ){
+            client->in_room = false;
+            *current_client = NULL;
             --(client_room->user_counter);
             return CORRECT;
         }
@@ -434,18 +447,23 @@ error cmd_stop( client_t* client, const char* string ){
 room_t* get_room( client_t* client ){
     assert( client );
 
-    size_t room_index = 0;
-    size_t client_index = 0;
-    room_t* current_room = NULL;
-    client_t* current_client = NULL;
+    room_t** current_room = rooms;
+    room_t** beginning_room = rooms;
+    size_t client_capacity = 0;
+    client_t** current_client = NULL;
+    client_t** beginning_client = NULL;
 
-    for( room_index = 0; room_index < rooms_info->free_room; room_index++ ){
-        current_room = &(rooms_info->rooms[room_index]);
-        for( client_index = 0; client_index < current_room->free_space; client_index++ ){
-            current_client = current_room->clients_array[client_index];
-            if( current_client && current_client->in_room &&
-                client == current_client ){
-                return current_room;
+    for( ; current_room < beginning_room + room_capacity; current_room++ ){
+        if( *current_room == NULL ){
+            continue;
+        }
+        beginning_client = (*current_room)->clients_array;
+        current_client = beginning_client;
+        client_capacity = (*current_room)->capacity;
+        for( ; current_client < beginning_client + client_capacity; current_client++ ){
+            if( *current_client && (*current_client)->in_room &&
+                client == *current_client ){
+                return *current_room;
             }
         }
     }
@@ -454,6 +472,7 @@ room_t* get_room( client_t* client ){
 
 void client_send(client_t* client, const char* format, ... ){
     assert( client );
+    assert( format );
 
     uv_buf_t buffer = {};
     FILE* stream = open_memstream( &buffer.base, &buffer.len );                                         //creating a stream for recording
@@ -463,9 +482,9 @@ void client_send(client_t* client, const char* format, ... ){
     fclose( stream );
     va_end( args );
 
-    uv_write_t* req = (uv_write_t*)calloc( one, sizeof(uv_write_t) );
+    uv_write_t* req = (uv_write_t*)calloc( ONE, sizeof(uv_write_t) );
     req->data = buffer.base;
-    uv_write( req, (uv_stream_t*)(&client->handle), &buffer, one, write_cb );                           //writing data to descriptor
+    uv_write( req, (uv_stream_t*)(&client->handle), &buffer, ONE, write_cb );                           //writing data to descriptor
 }
 
 void write_cb( uv_write_t* write_req, int status ){

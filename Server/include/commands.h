@@ -24,25 +24,17 @@ typedef struct command_map{
 typedef struct description_room {
     char* room_name;
     client_t** clients_array;
-    size_t free_space;                      // free index in array for new user
     size_t capacity;                        // capacity of array
-    size_t user_counter;
+    size_t user_counter;                    // number of active users
 } room_t;
-
-typedef struct data_rooms {
-    size_t capacity;
-    size_t free_room;
-    room_t* rooms;
-    error room_errors;
-} data_rooms_t;
 
 error init_rooms();
 
-error init_single_room( room_t* room );
+error init_single_room( room_t** room );
 
-error rooms_allocation();
+ssize_t rooms_allocation( ssize_t room_index );
 
-error clients_allocation( room_t* room );
+ssize_t clients_allocation( room_t* room, ssize_t client_index );
 
 void destroy_rooms();
 
@@ -66,8 +58,6 @@ void read_cb( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf );
 
 void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* client, const char* string ) );
 
-size_t get_min_size();
-
 void parse_command( client_t* client, const char* string );
 
 error send_message( client_t* client, const char* string );
@@ -75,6 +65,10 @@ error send_message( client_t* client, const char* string );
 error cmd_join( client_t* client, const char* string );
 
 bool room_search( client_t* client,  const char* room_name );
+
+ssize_t get_free_room();
+
+ssize_t get_free_client( room_t* room );
 
 error cmd_list( client_t* client, const char* string );
 

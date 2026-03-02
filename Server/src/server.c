@@ -10,8 +10,8 @@
 #include "logging.h"
 #include "commands.h"
 
-const size_t port = 27010;
-const int backlog = 128;
+const size_t PORT = 27010;
+const int BACKLOG = 128;
 
 int main( int argc, char** argv ){
 
@@ -29,14 +29,14 @@ int main( int argc, char** argv ){
     struct sockaddr_in server_addr = {};                                                    // port and IP
 
     uv_tcp_init( loop, &server );
-    uv_ip4_addr( ip, port, &server_addr );
+    uv_ip4_addr( ip, PORT, &server_addr );
     int bind_status = uv_tcp_bind( &server, (struct sockaddr*)(&server_addr), 0 );           // binding the socket to the ip address and port
     if( bind_status < 0 ){
         log_panic( "can not bind" );
         return 0;
     }
 
-    int listen_status = uv_listen( (uv_stream_t*)(&server), backlog, connection_cb );       // switching a TCP socket to listening mode
+    int listen_status = uv_listen( (uv_stream_t*)(&server), BACKLOG, connection_cb );       // switching a TCP socket to listening mode
     if( listen_status < 0 ){
         log_panic( "can not listen" );
         return 0;
