@@ -6,6 +6,7 @@
 
 #include "commands.h"
 #include "logging.h"
+#include "database.h"
 
 const size_t ONE = 1;                                                               //for calloc
 const size_t INIT_ROOMS_NUMBER = 10;                                                //for initialization array with rooms
@@ -16,10 +17,14 @@ const size_t INIT_CLIENT_NUMBER = 10;                                           
 */
 
 const command_map_t command_map[] = {
-    { "/join"   ,   cmd_join    },
-    { "/list"   ,   cmd_list    },
-    { "/stop"   ,   cmd_stop    },
-    { "/leave"  ,   cmd_leave   }
+    { "/week"       ,   cmd_week        },
+    { "/join"       ,   cmd_join        },
+    { "/list"       ,   cmd_list        },
+    { "/stop"       ,   cmd_stop        },
+    { "/leave"      ,   cmd_leave       },
+    { "/today"      ,   cmd_today       },
+    { "/yesterday"  ,   cmd_yesterday   },
+    { "/history"    ,   cmd_history     }
 };
 const size_t command_map_capacity = sizeof(command_map) / sizeof(command_map_t);
 const size_t MIN_COMMAND_SIZE = strlen(command_map[0].command_name) - 1;
@@ -51,6 +56,7 @@ error init_single_room( room_t** room ){
     (*room)->capacity = INIT_CLIENT_NUMBER;
     (*room)->user_counter = 0;
     (*room)->room_name = NULL;
+    (*room)->message_history = NULL;
 
     return CORRECT;
 }
@@ -118,6 +124,7 @@ void destroy_single_room( room_t* room ){
     room->user_counter = 0;
     room->room_name = NULL;
     free( room->clients_array );
+    fclose( room->message_history );
     free( room );
 }
 
@@ -151,6 +158,10 @@ void sending_instruction( client_t* client ){
     client_send( client, "Welcome to our messenger. You can:\n"
                          "/join [room_name] - join a room with name [room_name]\n"
                          "/list - find out the name of the room you are in and the number of participants\n"
+                         "/today - show the group's message history for the current day\n"
+                         "/yesterday - show the group's message history for yesterday\n"
+                         "/week - show the group's message history for the last week\n"
+                         "/history - show all unread messages\n"
                          "/leave - leave the current room\n"
                          "/stop - log out of the messenger\n\n" );
 }
@@ -160,6 +171,7 @@ void client_init( client_t* client ){
 
     client->capacity = 0;
     client->buf = NULL;
+    client->last_seen_message = NULL;
     client->len = 0;
     client->is_stopped = false;
     client->in_room = false;
@@ -180,6 +192,9 @@ void close_cb( uv_handle_t* handle ){
     client_t* client = (client_t*)handle->data;
     if( client->buf ){
         free( client->buf );
+    }
+    if( client->last_seen_message ){
+        free( client->last_seen_message );
     }
     removing_client( client );
 }
@@ -301,7 +316,7 @@ error send_message( client_t* client, const char* string ){
     room_t* client_room = get_room( client );
     if( client_room == NULL ){
         client_send( client, "\n\nto send messages to other users, go to the room\n\n" );
-        log_debug( "client_room is null ptr" );
+        log_warning( "client_room is null ptr" );
         return NULL_PTR;
     }
 
@@ -309,11 +324,16 @@ error send_message( client_t* client, const char* string ){
     client_t** client_beginning = client_room->clients_array;
     client_t** current_client = client_beginning;
     for( ; current_client < client_beginning + client_capacity; current_client++ ){
-        if( !(*current_client) || client == *current_client || (*current_client)->in_room == false ){               // sending a message to others client
+        if( !(*current_client) || client == *current_client || (*current_client)->in_room == false ){          // sending a message to others client
             continue;
         }
         client_send( *current_client, "%s\n", string );
+        if( (*current_client)->last_seen_message != NULL ){
+            free( (*current_client)->last_seen_message );                                                      // delete the previous message
+        }
+        (*current_client)->last_seen_message = strdup( string );
     }
+    save_message( string, client_room->message_history);
     return CORRECT;
 }
 
@@ -339,6 +359,7 @@ error cmd_join( client_t* client, const char* string ){
     rooms[free_room_index]->room_name = strdup( name_begin );
     rooms[free_room_index]->clients_array[free_client_index] = client;
     ++(rooms[free_room_index]->user_counter);
+    rooms[free_room_index]->message_history = create_history( rooms[free_room_index]->room_name );
     log_debug( "make new room and new client" );
     return CORRECT;
 }
@@ -352,7 +373,7 @@ bool room_search( client_t* client,  const char* room_name ){
     for( ; room_index < room_capacity; room_index++ ){
         current_room = rooms[room_index];
         if( current_room && strcmp( room_name, current_room->room_name ) == 0 ){
-            size_t free_client_index = get_free_client( current_room );
+            ssize_t free_client_index = get_free_client( current_room );
             free_client_index = clients_allocation( current_room, free_client_index );
             client->in_room = true;
             current_room->clients_array[free_client_index] = client;
@@ -391,15 +412,13 @@ error cmd_list( client_t* client, const char* string ){
     assert( client );
     assert( string );
 
-    log_debug( "Now we in function: list" );
     room_t* client_room = get_room( client );
     if( client_room == NULL ){
         client_send( client, "\n\nyou can't find out information about the room because you're not in it.\n\n" );
-        log_debug( "client_room is null ptr" );
+        log_warning( "client_room is null ptr" );
         return NULL_PTR;
     }
 
-    log_debug( "in /list: %s", string );
     client_send( client, "\n"
                          "you are in the room: %s\n"
                          "number of clients in room: %lu\n\n",
@@ -413,7 +432,7 @@ error cmd_leave( client_t* client, const char* string ){
 
     room_t* client_room = get_room( client );
     if( client_room == NULL ){
-        log_debug( "client_room is null ptr" );
+        log_warning( "client_room is null ptr" );
         return NULL_PTR;
     }
 
@@ -430,7 +449,7 @@ error cmd_leave( client_t* client, const char* string ){
         }
 
     }
-    log_debug( "client was not found in any room" );
+    log_warning( "client was not found in any room" );
     return SEARCH_ERROR;
 }
 
@@ -468,6 +487,90 @@ room_t* get_room( client_t* client ){
         }
     }
     return NULL;
+}
+
+error cmd_today( client_t* client, const char* string ){
+    assert( client );
+    assert( string );
+
+    room_t* client_room = get_room( client );
+    if( client_room == NULL ){
+        log_warning( "client_room is null ptr" );
+        return NULL_PTR;
+    }
+
+    char* message_history = get_today_messages( client_room->message_history );
+    if( message_history == NULL ){
+        log_error( "error getting message history" );
+        return NULL_PTR;
+    }
+
+    client_send( client, "__________Today's message history______\n%s\n\n", message_history );
+    free( message_history );
+    return CORRECT;
+}
+
+error cmd_yesterday( client_t* client, const char* string ){
+    assert( client );
+    assert( string );
+
+    room_t* client_room = get_room( client );
+    if( client_room == NULL ){
+        log_warning( "client_room is null ptr" );
+        return NULL_PTR;
+    }
+
+    char* message_history = get_yesterday_messages( client_room->message_history );
+    if( message_history == NULL ){
+        log_error( "error getting message history" );
+        return NULL_PTR;
+    }
+
+    client_send( client, "__________History of yesterday's messages______\n%s\n\n", message_history );
+    free( message_history );
+    return CORRECT;
+};
+
+error cmd_week( client_t* client, const char* string ){
+    assert( client );
+    assert( string );
+
+    room_t* client_room = get_room( client );
+    if( client_room == NULL ){
+        log_warning( "client_room is null ptr" );
+        return NULL_PTR;
+    }
+
+    char* message_history = get_week_messages( client_room->message_history );
+    if( message_history == NULL ){
+        log_error( "error getting message history" );
+        return NULL_PTR;
+    }
+
+    client_send( client, "__________Message history for the week______\n%s\n\n", message_history );
+    free( message_history );
+    return CORRECT;
+}
+
+error cmd_history( client_t* client, const char* string ){
+    assert( client );
+    assert( string );
+
+    room_t* client_room = get_room( client );
+    if( client_room == NULL ){
+        log_warning( "client_room is null ptr" );
+        return NULL_PTR;
+    }
+
+    char* message_history = get_unread_messages( client_room->message_history, client->last_seen_message );
+    if( message_history == NULL ){
+        log_error( "error getting message history" );
+        return NULL_PTR;
+    }
+
+    client_send( client, "__________All unread messages______\n%s\n\n", message_history );
+    free( message_history );
+    return CORRECT;
 }
 
 void client_send(client_t* client, const char* format, ... ){

@@ -2,14 +2,16 @@
 #define COMMANDS_H
 
 #include <stdio.h>
-#include <uv.h>
 #include <stdbool.h>
+#include <time.h>
+#include <uv.h>
 
 #include "logging.h"
 
 typedef struct client_info {
     uv_tcp_t handle;
     char* buf;
+    char* last_seen_message;
     size_t capacity;
     size_t len;
     bool is_stopped;
@@ -24,6 +26,7 @@ typedef struct command_map{
 typedef struct description_room {
     char* room_name;
     client_t** clients_array;
+    FILE* message_history;
     size_t capacity;                        // capacity of array
     size_t user_counter;                    // number of active users
 } room_t;
@@ -75,6 +78,14 @@ error cmd_list( client_t* client, const char* string );
 error cmd_leave( client_t* client, const char* string );
 
 error cmd_stop( client_t* client, const char* string );
+
+error cmd_today( client_t* client, const char* string );
+
+error cmd_yesterday( client_t* client, const char* string );
+
+error cmd_week( client_t* client, const char* string );
+
+error cmd_history( client_t* client, const char* string );
 
 void client_send(client_t* client, const char* format, ... );
 

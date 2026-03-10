@@ -28,21 +28,26 @@ typedef enum code_error {
 
 #define COLORING( style, color ) style color
 
-#define log_panic( message, ... ) fprintf( stderr, COLORING( BOLD, RED ) \
-                                           "[PANIC] File: %s , function: %s , message: " message RESET "\n", __FILE__, __FUNCTION__, ##__VA_ARGS__ )
+#define log_panic( message, ... ) fprintf( stderr, COLORING( BOLD, RED )                                                        \
+                                           "[PANIC] File: %s , function: %s , line %d, message: " message RESET "\n",           \
+                                           __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__ )
 
-#define log_error( message, ... ) fprintf( stderr, COLORING( BOLD, RED ) \
-                                           "[ERROR] File: %s , function: %s , message: " message RESET "\n", __FILE__, __FUNCTION__, ##__VA_ARGS__ )
+#define log_error( message, ... ) fprintf( stderr, COLORING( BOLD, RED )                                                        \
+                                           "[ERROR] File: %s , function: %s , line %d, message: " message RESET "\n",           \
+                                           __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__ )
 
-#define log_warning( message, ... ) fprintf( stderr, COLORING( BOLD, BLUE ) \
-                                           "[WARNING] File: %s , function: %s , message: " message RESET "\n", __FILE__, __FUNCTION__, ##__VA_ARGS__ )
+#define log_warning( message, ... ) fprintf( stderr, COLORING( BOLD, BLUE )                                                     \
+                                           "[WARNING] File: %s , function: %s , line %d, message: " message RESET "\n",         \
+                                           __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__ )
 
-#define log_info( message, ... ) fprintf( stderr, COLORING( BOLD, YELLOW ) \
-                                           "[INFO] File: %s , function: %s , message: " message RESET "\n", __FILE__, __FUNCTION__, ##__VA_ARGS__ )
+#define log_info( message, ... ) fprintf( stderr, COLORING( BOLD, YELLOW )                                                      \
+                                           "[INFO] File: %s , function: %s , line %d, message: " message RESET "\n",            \
+                                           __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__ )
 
 #ifdef _DEBUG
-#define log_debug( message, ... ) fprintf( stderr, COLORING( BOLD, PURPLE ) \
-                                           "[DEBUG] File: %s , function: %s , message: " message RESET "\n", __FILE__, __FUNCTION__, ##__VA_ARGS__)
+#define log_debug( message, ... ) fprintf( stderr, COLORING( BOLD, PURPLE )                                                     \
+                                           "[DEBUG] File: %s , function: %s , line %d, message: " message RESET "\n",           \
+                                           __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__ )
 
 void server_verify( error code_error );
 
