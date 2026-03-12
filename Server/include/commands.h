@@ -26,9 +26,10 @@ typedef struct command_map{
 typedef struct description_room {
     char* room_name;
     client_t** clients_array;
-    FILE* message_history;
+    FILE* message_history;                  // file ptr for read history
     size_t capacity;                        // capacity of array
     size_t user_counter;                    // number of active users
+    int write_fd;                           // file descriptor for writing messages
 } room_t;
 
 error init_rooms();

@@ -12,7 +12,8 @@ typedef enum database_err_e {
     MEMORY_ERR          = 3,
     WRITE_IN_FILE_ERR   = 4,
     NO_ROOM             = 5,
-    PERIOD_ERR          = 6
+    PERIOD_ERR          = 6,
+    NO_FOLDER           = 7
 } database_err;
 
 typedef enum period_type_e {
@@ -27,12 +28,17 @@ typedef struct history_s {
     size_t history_len;
 } history_t;
 
-typedef struct search_info_s{
-    char* last_seen_message;
+typedef struct search_history_s{
+    char** last_seen_message;
     int current_day;
     int min_difference;
     int max_difference;
-} search_info_t;
+} search_history_t;
+
+typedef struct file_info_s{
+    FILE* read_fd;
+    int write_fd;
+} file_info_t;
 
 typedef struct tm time_data_t;
 
@@ -42,9 +48,9 @@ database_err make_dir();
 
 database_err delete_dir();
 
-FILE* create_history( char* room_name );
+file_info_t create_history( char* room_name );
 
-database_err save_message( const char* message, FILE* message_history );
+database_err save_message( const char* message, int write_fd );
 
 char* get_today_messages( FILE* message_history );
 
@@ -52,20 +58,20 @@ char* get_yesterday_messages( FILE* message_history );
 
 char* get_week_messages( FILE* message_history );
 
-char* get_history( FILE* message_history, search_info_t search_info, period_type what_message );
+char* get_history( FILE* message_history, search_history_t* search_history, period_type what_message );
 
-database_err read_history( FILE* message_history, history_t* history_info, search_info_t search_info );
+database_err read_history( FILE* message_history, history_t* history_info, search_history_t* search_history );
 
-database_err fixed_period( FILE* message_history, history_t* history_info, search_info_t search_info );
+database_err fixed_period( FILE* message_history, history_t* history_info, search_history_t* search_history );
 
-char* get_unread_messages( FILE* message_history, const char* last_seen_message );
+char* get_unread_messages( FILE* message_history, char** last_seen_message );
 
-database_err unread_messages( FILE* message_history, history_t* history_info, search_info_t search_info );
+database_err unread_messages( FILE* message_history, history_t* history_info, search_history_t* search_history );
 
-database_err scan_unread_message( FILE* message_history, history_t* history_info, search_info_t search_info );
+database_err scan_unread_message( FILE* message_history, history_t* history_info, search_history_t* search_history );
 
-database_err all_messages( FILE* message_history, history_t* history_info, search_info_t search_info );
+database_err all_messages( FILE* message_history, history_t* history_info );
 
-database_err read_all_messages( FILE* message_history, history_t* history_info, search_info_t search_info );
+database_err read_all_messages( FILE* message_history, history_t* history_info );
 
 #endif

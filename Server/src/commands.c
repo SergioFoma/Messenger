@@ -331,16 +331,20 @@ error send_message( client_t* client, const char* string ){
         if( (*current_client)->last_seen_message != NULL ){
             free( (*current_client)->last_seen_message );                                                      // delete the previous message
         }
-        (*current_client)->last_seen_message = strdup( string );
+        (*current_client)->last_seen_message = strdup( string );                                               // save new message
     }
-    save_message( string, client_room->message_history);
+
+    if( client->last_seen_message != NULL ){
+        free( client->last_seen_message );
+    }
+    client->last_seen_message = strdup( string );
+    save_message( string, client_room->write_fd );
     return CORRECT;
 }
 
 error cmd_join( client_t* client, const char* string ){
     assert( client );
     assert( string );
-
 
     const char* name_begin = strchr( string, ' ' ) + 1;
     if( room_search( client, name_begin ) ){
@@ -356,10 +360,13 @@ error cmd_join( client_t* client, const char* string ){
     free_client_index = clients_allocation( rooms[free_room_index], free_client_index );
 
     client->in_room = true;
-    rooms[free_room_index]->room_name = strdup( name_begin );
-    rooms[free_room_index]->clients_array[free_client_index] = client;
-    ++(rooms[free_room_index]->user_counter);
-    rooms[free_room_index]->message_history = create_history( rooms[free_room_index]->room_name );
+    room_t* free_room = rooms[free_room_index];
+    free_room->room_name = strdup( name_begin );
+    free_room->clients_array[free_client_index] = client;
+    ++(free_room->user_counter);
+    file_info_t file_info = create_history( free_room->room_name );                         // file descriptors for writing and reading
+    free_room->message_history = file_info.read_fd;                                         // save the file descriptor for reading
+    free_room->write_fd = file_info.write_fd;                                               // save the file descriptor for writing
     log_debug( "make new room and new client" );
     return CORRECT;
 }
@@ -562,7 +569,7 @@ error cmd_history( client_t* client, const char* string ){
         return NULL_PTR;
     }
 
-    char* message_history = get_unread_messages( client_room->message_history, client->last_seen_message );
+    char* message_history = get_unread_messages( client_room->message_history, &(client->last_seen_message) );
     if( message_history == NULL ){
         log_error( "error getting message history" );
         return NULL_PTR;

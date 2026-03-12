@@ -15,6 +15,7 @@ const size_t PORT = 27010;
 const int BACKLOG = 128;
 
 int main( int argc, char** argv ){
+    delete_dir();                                                                          // delete the previous history folder
 
     char* ip = NULL;
     if( argc > 1 ){
@@ -49,6 +50,5 @@ int main( int argc, char** argv ){
     error_check( init_error, 0 );
     uv_run( loop, UV_RUN_DEFAULT );
     destroy_rooms();
-    delete_dir();
     return 0;
 }
