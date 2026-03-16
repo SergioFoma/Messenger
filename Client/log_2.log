@@ -1,0 +1,6 @@
+[INFO] File: src/logger.c , function: open_log_file , line 13, message: success open log file
+
+[INFO] File: src/client.c , function: main , line 38, message: loop start ... 
+[INFO] File: src/callbacks.c , function: connect_cb , line 42, message: read start
+[WARNING] File: src/callbacks.c , function: read_con_cb , line 130, message: user doesn't enter data from keyboard or finish program
+[ERROR] File: src/callbacks.c , function: shutdown_cb , line 147, message: shutdown callback get negative status

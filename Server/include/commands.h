@@ -8,7 +8,7 @@
 
 #include "logging.h"
 
-typedef struct client_info {
+typedef struct client_info_s {
     uv_tcp_t handle;
     char* buf;
     char* last_seen_message;
@@ -18,12 +18,12 @@ typedef struct client_info {
     bool in_room;
 } client_t;
 
-typedef struct command_map{
+typedef struct command_map_s{
     const char* command_name;
     error (*cmd)(client_t* client, const char* string );
 } command_map_t;
 
-typedef struct description_room {
+typedef struct description_room_s {
     char* room_name;
     client_t** clients_array;
     FILE* message_history;                  // file ptr for read history

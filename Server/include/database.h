@@ -42,6 +42,13 @@ typedef struct file_info_s{
 
 typedef struct tm time_data_t;
 
+typedef struct entry_s {
+    char* message;
+    unsigned long hash;
+    size_t message_len;
+    int day;
+} entry_t;
+
 unsigned long hash( const char* string );
 
 database_err make_dir();
@@ -73,5 +80,7 @@ database_err scan_unread_message( FILE* message_history, history_t* history_info
 database_err all_messages( FILE* message_history, history_t* history_info );
 
 database_err read_all_messages( FILE* message_history, history_t* history_info );
+
+entry_t read_hist_line( char* hist_line );
 
 #endif

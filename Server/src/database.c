@@ -170,6 +170,27 @@ database_err fixed_period( FILE* message_history,  history_t* history_info , sea
     return SUCCESS;
 }
 
+entry_t read_hist_line( char* hist_line ){
+    assert( hist_line );
+
+    char* whitespace = strchr( hist_line, ' ' );
+    *whitespace = '\0';                                         // ' ' --> '\0'
+    char* opening_bracket = strchr( whitespace + 1, '[' );
+    *opening_bracket = '\0';                                    // '[' --> '\0'
+    *(opening_bracket - 1) = '\n';                              // ' ' --> '\n'
+    char* close_bracket = strchr( opening_bracket + 1, ']' );
+    *close_bracket = '\0';                                      // ']' --> '\0'
+
+    entry_t entry = {};
+    entry.message = whitespace + 1;
+    entry.hash = strtoul( opening_bracket + 1, NULL, 10);       // string --> unsigned
+    entry.message_len = strlen( whitespace + 1);
+    entry.day = atoi( hist_line );
+
+    log_info( "message = %s, message_len = %lu, hash = %lu, day = %d", entry.message, entry.message_len, entry.hash, entry.day );
+    return entry;
+}
+
 database_err read_history( FILE* message_history, history_t* history_info, search_history_t* search_history ){
     assert( message_history );
     assert( history_info );
@@ -177,28 +198,24 @@ database_err read_history( FILE* message_history, history_t* history_info, searc
     char* buffer = NULL;
     size_t buffer_capacity = 0;
     ssize_t buffer_len = 0 ;
-    char* whitespace = NULL;
-    char* opening_bracket = NULL;
+    entry_t hist_line = {};
+    FILE* hst = open_memstream( &history_info->history, &history_info->history_len );
 
     while( ( buffer_len = getline_wrapper( &buffer, &buffer_capacity, message_history ) ) != -1 ){
-        whitespace = strchr( buffer, ' ' );
-        *whitespace = '\0';
-        int day = atoi( buffer );                                                                     //  read the days in a year
-        if( search_history->min_difference <= search_history->current_day - day &&
-                                      search_history->current_day - day <= search_history->max_difference ){
+        hist_line = read_hist_line( buffer );                                                           //  parse history line
+        if( search_history->min_difference <= search_history->current_day - hist_line.day &&
+                                              search_history->current_day - hist_line.day <= search_history->max_difference ){
 
-            opening_bracket = strchr( whitespace + 1, '[' );
-            if( history_info->history_capacity <= history_info->history_len + opening_bracket - whitespace ){
-                history_info->history_capacity = ( history_info->history_len + opening_bracket - whitespace ) * 2;
+            if( history_info->history_capacity <= history_info->history_len + hist_line.message_len ){
+                history_info->history_capacity = ( history_info->history_len + hist_line.message_len ) * 2;
                 history_info->history = (char*)realloc( history_info->history, history_info->history_capacity * sizeof(char) );
             }
-            *(opening_bracket - 1 ) = '\n';
-            *opening_bracket = '\0';
-            history_info->history_len += opening_bracket - whitespace;
-            strncat( history_info->history, whitespace + 1, opening_bracket - whitespace );
+            history_info->history_len += hist_line.message_len;
+            fprintf( hst, "%.*s", hist_line.message_len, hist_line.message );
         }
     }
 
+    fclose( hst );
     free( buffer );
     return SUCCESS;
 }
@@ -236,34 +253,26 @@ database_err scan_unread_message( FILE* message_history, history_t* history_info
     char* buffer = NULL;
     size_t buffer_capacity = 0;
     ssize_t buffer_len = 0 ;
-    char* opening_bracket = NULL;
-    char* close_bracket = NULL;
-    char* whitespace = NULL;
     unsigned long message_hash = hash( *(search_history->last_seen_message) );
-    unsigned long read_hash = 0;
+    entry_t hist_line = {};
+    FILE* hst = open_memstream( &history_info->history, &history_info->history_len );
 
     while( ( buffer_len = getline_wrapper( &buffer, &buffer_capacity, message_history ) ) != -1 ){
-        opening_bracket = strchr( buffer, '[' );
-        close_bracket = strchr( buffer, ']' );
-        *close_bracket = '\0';
-        read_hash = strtoul( opening_bracket + 1, NULL, 10);        // convert string to unsigned
-        if( message_hash == read_hash ){
+        hist_line = read_hist_line( buffer );
+        if( message_hash == hist_line.hash ){
             break;
         }
     }
 
     char* last_read_message = NULL;
     while( ( buffer_len = getline_wrapper( &buffer, &buffer_capacity, message_history ) ) != -1 ){
-        opening_bracket = strchr( buffer, '[' );
-        whitespace = strchr( buffer, ' ' );
-        if( history_info->history_capacity <= history_info->history_len + opening_bracket - whitespace ){
-            history_info->history_capacity = ( history_info->history_len + opening_bracket - whitespace ) * 2;
+        hist_line = read_hist_line( buffer );
+        if( history_info->history_capacity <= history_info->history_len + hist_line.message_len ){
+            history_info->history_capacity = ( history_info->history_len + hist_line.message_len ) * 2;
             history_info->history = (char*)realloc( history_info->history, history_info->history_capacity * sizeof(char) );
         }
-        history_info->history_len += opening_bracket - whitespace;
-        *(opening_bracket - 1 ) = '\n';
-        *opening_bracket = '\0';
-        strncat( history_info->history, whitespace + 1, opening_bracket - whitespace );
+        history_info->history_len += hist_line.message_len;
+        fprintf( hst, "%.*s", hist_line.message_len, hist_line.message );
         last_read_message = buffer;
     }
 
@@ -272,6 +281,7 @@ database_err scan_unread_message( FILE* message_history, history_t* history_info
         *(search_history->last_seen_message) = strdup( last_read_message );
         log_info( "update last seen message" );
     }
+    fclose( hst );
     free( buffer );
     return SUCCESS;
 }
@@ -295,22 +305,20 @@ database_err read_all_messages( FILE* message_history, history_t* history_info )
     char* buffer = NULL;
     size_t buffer_capacity = 0;
     ssize_t buffer_len = 0 ;
-    char* opening_bracket = NULL;
-    char* whitespace = NULL;
+    entry_t hist_line = {};
+    FILE* hst = open_memstream( &history_info->history, &history_info->history_len );
 
     while( ( buffer_len = getline_wrapper( &buffer, &buffer_capacity, message_history ) ) != -1 ){
-        opening_bracket = strchr( buffer, '[' );
-        whitespace = strchr( buffer, ' ' );
-        if( history_info->history_capacity <= history_info->history_len + opening_bracket - whitespace ){
-            history_info->history_capacity = ( history_info->history_len + opening_bracket - whitespace ) * 2;
+        hist_line = read_hist_line( buffer );
+        if( history_info->history_capacity <= history_info->history_len + hist_line.message_len ){
+            history_info->history_capacity = ( history_info->history_len + hist_line.message_len ) * 2;
             history_info->history = (char*)realloc( history_info->history, history_info->history_capacity * sizeof(char) );
         }
-        history_info->history_len += opening_bracket - whitespace;
-        *(opening_bracket - 1 ) = '\n';
-        *opening_bracket = '\0';
-        strncat( history_info->history, whitespace + 1, opening_bracket - whitespace );
+        history_info->history_len += hist_line.message_len;
+        fprintf( hst, "%.*s", hist_line.message_len, hist_line.message );
     }
 
+    fclose( hst );
     free( buffer );
     return SUCCESS;
 }

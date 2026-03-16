@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef enum code_error {
+typedef enum code_error_e {
     CORRECT                         = 0,
     MEMORY_ALLOC_ERR                = 1,
     NULL_PTR                        = 2,
@@ -61,7 +61,7 @@ void server_verify( error code_error );
 
 #else
 #define log_debug( message, ... )
-#define error_checK( error ) do{}while( false )
+#define error_check( error ) do{}while( false )
 #endif
 
 #endif

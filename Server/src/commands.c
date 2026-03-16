@@ -210,7 +210,7 @@ void removing_client( client_t* client ){
 
     client_t** clients_beginning = client_room->clients_array;
     size_t clients_capacity = client_room->capacity;
-    client_t** current_client = NULL;
+    client_t** current_client = clients_beginning;
     for( ; current_client < clients_beginning + clients_capacity; current_client++ ){
         if( *current_client == client ){
             free( client );
@@ -235,7 +235,9 @@ void alloc_cb( uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf ){
         client->buf = (char*)calloc( suggested_size, sizeof(char) );
     }
 
-    client->capacity = client->capacity >= client->len + suggested_size ? client->capacity : client->len + suggested_size;
+    client->capacity = client->capacity >= client->len + suggested_size
+                       ? client->capacity
+                       : client->len + suggested_size;
     buf->base = client->buf + client->len;
     buf->len = suggested_size;
 }
