@@ -8,7 +8,15 @@ typedef enum code_error_e {
     CORRECT                         = 0,
     MEMORY_ALLOC_ERR                = 1,
     NULL_PTR                        = 2,
-    SEARCH_ERROR                    = 3
+    SEARCH_ERROR                    = 3,
+    MEMORY_REALLOC_ERR              = 4,
+    ADD_TRANSFER_ERR                = 5,
+    BIND_ERR                        = 6,
+    LISTEN_ERR                      = 7,
+    FIND_TRANSFER_ERR               = 8,
+    NOT_ENOUGH_ANSWERS		    = 9,
+    ADD_OPEN_FILE_ERR		    = 10,
+    BOT_REG_ERR			    = 11
 } error;
 
 #define DEFAULT         "\033["

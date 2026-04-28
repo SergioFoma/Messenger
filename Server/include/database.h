@@ -14,13 +14,23 @@ typedef enum database_err_e {
     NO_ROOM             = 5,
     PERIOD_ERR          = 6,
     NO_FOLDER           = 7
-} database_err;
+} database_err_t;
 
 typedef enum period_type_e {
     FIXED_TIME          = 0,
     ALL_UNREAD_SMS      = 1,
     ALL_SMS             = 2
-} period_type;
+} period_type_t;
+
+typedef enum duration_e {
+    SECOND      =   0,
+    MINUTE      =   1,
+    HOUR        =   2,
+    DAY         =   3,
+    WEEKS       =   4,
+    MONTH       =   5,
+    YEAR        =   6
+} duration_t;
 
 typedef struct history_s {
     char* history;
@@ -30,9 +40,9 @@ typedef struct history_s {
 
 typedef struct search_history_s{
     char** last_seen_message;
-    int current_day;
-    int min_difference;
-    int max_difference;
+    time_t current_time;                     // number of seconds since 1970
+    time_t min_difference;
+    time_t max_difference;
 } search_history_t;
 
 typedef struct file_info_s{
@@ -51,13 +61,13 @@ typedef struct entry_s {
 
 unsigned long hash( const char* string );
 
-database_err make_dir();
+database_err_t make_dir();
 
-database_err delete_dir();
+database_err_t delete_dir();
 
 file_info_t create_history( char* room_name );
 
-database_err save_message( const char* message, int write_fd );
+database_err_t save_message( const char* message, int write_fd );
 
 char* get_today_messages( FILE* message_history );
 
@@ -65,21 +75,23 @@ char* get_yesterday_messages( FILE* message_history );
 
 char* get_week_messages( FILE* message_history );
 
-char* get_history( FILE* message_history, search_history_t* search_history, period_type what_message );
+char* get_history( FILE* message_history, search_history_t* search_history, period_type_t what_message );
 
-database_err read_history( FILE* message_history, history_t* history_info, search_history_t* search_history );
+database_err_t read_history( FILE* message_history, history_t* history_info, search_history_t* search_history );
 
-database_err fixed_period( FILE* message_history, history_t* history_info, search_history_t* search_history );
+database_err_t fixed_period( FILE* message_history, history_t* history_info, search_history_t* search_history );
+
+time_t get_seconds( int count, duration_t duration );
 
 char* get_unread_messages( FILE* message_history, char** last_seen_message );
 
-database_err unread_messages( FILE* message_history, history_t* history_info, search_history_t* search_history );
+database_err_t unread_messages( FILE* message_history, history_t* history_info, search_history_t* search_history );
 
-database_err scan_unread_message( FILE* message_history, history_t* history_info, search_history_t* search_history );
+database_err_t scan_unread_message( FILE* message_history, history_t* history_info, search_history_t* search_history );
 
-database_err all_messages( FILE* message_history, history_t* history_info );
+database_err_t all_messages( FILE* message_history, history_t* history_info );
 
-database_err read_all_messages( FILE* message_history, history_t* history_info );
+database_err_t read_all_messages( FILE* message_history, history_t* history_info );
 
 entry_t read_hist_line( char* hist_line );
 

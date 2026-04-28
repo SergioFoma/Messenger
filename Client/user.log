@@ -1,0 +1,32 @@
+[INFO] File: src/logger.c , function: open_log_file , line 13, message: success open log file
+[INFO] File: src/user_interface.c , function: get_console_size , line 50, message: default console size: nlines = 63, ncolumns = 254
+[INFO] File: src/callbacks.c , function: start_registration , line 39, message: IP: 10.55.131.153
+[INFO] File: src/client.c , function: main , line 42, message: loop start ... 
+[INFO] File: src/callbacks.c , function: connect_cb , line 86, message: read start
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: new_room
+[DEBUG] File: src/user_interface.c , function: add_chat , line 397, message: added room: new_room
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: new_room
+[DEBUG] File: src/user_interface.c , function: add_chat , line 397, message: added room: new_room
+[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 230, message: current name = 'new_room', room name = 'new_room'
+[INFO] File: src/user_interface.c , function: check_connect_possibility , line 232, message: room was found
+[INFO] File: src/callbacks.c , function: join_room , line 382, message: client join room: new_room
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 555, message: new_room
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 561, message: NEW_ROOM
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 104
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 121
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 33
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 10
+[INFO] File: src/callbacks.c , function: send_message , line 490, message: client send message: hy!
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
+[INFO] File: src/callbacks.c , function: send_bot_path , line 464, message: path of bot file = '/home/foma/prog.c'
+[DEBUG] File: src/callbacks.c , function: show_server_message , line 608, message: Message from server = 'Unknown command: /bot_file /home/foma/prog.c
+'
+[WARNING] File: src/callbacks.c , function: find_srv_command , line 657, message: command was not found

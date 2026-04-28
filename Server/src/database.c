@@ -21,11 +21,18 @@ const long FILE_BEGIN = 0;                          // for fseek
 const int DELETE_FILE = 0;                          // for unlinkat
 const size_t NUMBER_INIT = 10;                      // for calloc
 const size_t MAX_HISTORY_LINE = 1024;               // for snprintf
+const size_t TWO_DOTS = 2;
 
+const time_t ONE_MINUTE     =   60;                 // count of seconds in 1 minute
+const time_t ONE_HOUR       =   3600;
+const time_t ONE_DAY        =   86400;
+const time_t ONE_WEEK       =   604800;
+const time_t ONE_MONTH      =   604800 * 4;
+const time_t ONE_YEAR       =   604800 * 4 * 12;
 
-const int TODAY     = 0;                            // messages written on the same day must have a difference in the number of days - 0
-const int YESTERDAY = 1;                            // a message written yesterday should have a difference of 1 day
-const int WEEK      = 6;                            // a message written this week must have a difference in days no more than 6
+const int TODAY     = 1;                            // messages written on the same day must have a difference in the number of days - 0
+const int YESTERDAY = 2;                            // a message written yesterday should have a difference of 1 day
+const int WEEK      = 1;                            // a message written this week must have a difference in days no more than 6
 
 unsigned long hash( const char* string ){
     assert( string );
@@ -38,7 +45,7 @@ unsigned long hash( const char* string ){
     return hash;
 }
 
-database_err make_dir(){
+database_err_t make_dir(){
 
     if( mkdir( FOLDER_NAME, DIR_MODE ) != 0 ){
         log_panic( "error creating folder" );
@@ -47,7 +54,7 @@ database_err make_dir(){
     return SUCCESS;
 }
 
-database_err delete_dir(){
+database_err_t delete_dir(){
 
     DIR* data_folder = opendir( FOLDER_NAME );                                      // open the directory to read its contents
     if( data_folder == NULL ){
@@ -59,7 +66,7 @@ database_err delete_dir(){
     int result;
     struct dirent* current_file = NULL;
     while( ( current_file = readdir( data_folder ) ) != NULL ){
-        if( current_file->d_name[0] == '.' || current_file->d_name[0] == '..' ){   // check that we received the correct file.
+        if( current_file->d_name[0] == '.' || strncmp(current_file->d_name, "..", TWO_DOTS ) == 0 ){   // check that we received the correct file.
             continue;
         }
         result = unlinkat( folder_fd, current_file->d_name, DELETE_FILE );         // delete file
@@ -83,7 +90,7 @@ file_info_t create_history( char* room_name ){
     return file_info;
 }
 
-database_err save_message( const char* message, int write_fd ){
+database_err_t save_message( const char* message, int write_fd ){
     assert( message );
 
     if( write_fd == -1 ){
@@ -92,14 +99,9 @@ database_err save_message( const char* message, int write_fd ){
     }
 
     time_t current_time = time(NULL);                                                        // get current time
-    time_data_t* time_data = localtime(&current_time);
-    if( time_data == NULL ){
-        log_panic( "function localtime returned error" );
-        return PERIOD_ERR;
-    }
 
     char* history_line = (char*)calloc( MAX_HISTORY_LINE, sizeof(char) );
-    int line_len = snprintf( history_line, MAX_HISTORY_LINE, "%d %s [%lu]\n", time_data->tm_yday, message, hash( message ) );
+    int line_len = snprintf( history_line, MAX_HISTORY_LINE, "%ld %s [%lu]\n", current_time, message, hash( message ) );
     write( write_fd, history_line, line_len );
     return SUCCESS;
 }
@@ -109,8 +111,9 @@ char* get_today_messages( FILE* message_history ){
     assert( message_history );
 
     time_t current_time = time(NULL);
-    time_data_t* time_data = localtime(&current_time);
-    search_history_t search_history = { NULL, time_data->tm_yday, TODAY, TODAY };
+    time_t min_difference = 0;
+    time_t max_difference = get_seconds( TODAY, DAY );
+    search_history_t search_history = { NULL, current_time, min_difference, max_difference };
 
     return get_history( message_history, &search_history, FIXED_TIME );
 }
@@ -119,8 +122,9 @@ char* get_yesterday_messages( FILE* message_history ){
     assert( message_history );
 
     time_t current_time = time(NULL);
-    time_data_t* time_data = localtime(&current_time);
-    search_history_t search_history = { NULL, time_data->tm_yday, YESTERDAY, YESTERDAY };
+    time_t min_difference = get_seconds( TODAY, DAY );
+    time_t max_difference = get_seconds( YESTERDAY, DAY );
+    search_history_t search_history = { NULL, current_time, min_difference, max_difference };
 
     return get_history( message_history, &search_history, FIXED_TIME );
 }
@@ -129,18 +133,19 @@ char* get_week_messages( FILE* message_history ){
     assert( message_history );
 
     time_t current_time = time(NULL);
-    time_data_t* time_data = localtime(&current_time);
-    search_history_t search_history = { NULL, time_data->tm_yday, 0, WEEK };
+    time_t min_difference = 0;
+    time_t max_difference = get_seconds( WEEK, WEEKS );
+    search_history_t search_history = { NULL, current_time, min_difference, max_difference };
 
     return get_history( message_history, &search_history, FIXED_TIME );
 }
 
-char* get_history( FILE* message_history, search_history_t* search_history, period_type what_message ){
+char* get_history( FILE* message_history, search_history_t* search_history, period_type_t what_message ){
     assert( message_history );
 
     history_t history_info = { NULL, NUMBER_INIT, 0 };
     history_info.history = (char*)calloc( NUMBER_INIT, sizeof(char) );
-    database_err read_status = SUCCESS;
+    database_err_t read_status = SUCCESS;
     if( what_message == FIXED_TIME ){
         read_status = fixed_period( message_history, &history_info, search_history );
     }
@@ -158,11 +163,11 @@ char* get_history( FILE* message_history, search_history_t* search_history, peri
     return history_info.history;
 }
 
-database_err fixed_period( FILE* message_history,  history_t* history_info , search_history_t* search_history){
+database_err_t fixed_period( FILE* message_history,  history_t* history_info , search_history_t* search_history){
     assert( message_history );
     assert( history_info );
 
-    database_err read_status = read_history( message_history, history_info, search_history );
+    database_err_t read_status = read_history( message_history, history_info, search_history );
     if( read_status != SUCCESS ){
         log_panic( "read_history returned null ptr" );
         return read_status;
@@ -191,7 +196,7 @@ entry_t read_hist_line( char* hist_line ){
     return entry;
 }
 
-database_err read_history( FILE* message_history, history_t* history_info, search_history_t* search_history ){
+database_err_t read_history( FILE* message_history, history_t* history_info, search_history_t* search_history ){
     assert( message_history );
     assert( history_info );
 
@@ -203,8 +208,8 @@ database_err read_history( FILE* message_history, history_t* history_info, searc
 
     while( ( buffer_len = getline_wrapper( &buffer, &buffer_capacity, message_history ) ) != -1 ){
         hist_line = read_hist_line( buffer );                                                           //  parse history line
-        if( search_history->min_difference <= search_history->current_day - hist_line.day &&
-                                              search_history->current_day - hist_line.day <= search_history->max_difference ){
+        if( search_history->min_difference <= search_history->current_time - hist_line.day &&
+                                              search_history->current_time - hist_line.day <= search_history->max_difference ){
 
             if( history_info->history_capacity <= history_info->history_len + hist_line.message_len ){
                 history_info->history_capacity = ( history_info->history_len + hist_line.message_len ) * 2;
@@ -218,6 +223,28 @@ database_err read_history( FILE* message_history, history_t* history_info, searc
     fclose( hst );
     free( buffer );
     return SUCCESS;
+}
+
+time_t get_seconds( int count, duration_t duration ){
+
+    switch( duration ){
+        case SECOND:
+            return count;
+        case MINUTE:
+            return count * ONE_MINUTE;
+        case HOUR:
+            return count * ONE_HOUR;
+        case DAY:
+            return count * ONE_DAY;
+        case WEEKS:
+            return count * ONE_WEEK;
+        case MONTH:
+            return count * ONE_MONTH;
+        case YEAR:
+            return count * ONE_YEAR;
+        default:
+            return 0;
+    }
 }
 
 char* get_unread_messages( FILE* message_history, char** last_seen_message ){
@@ -234,11 +261,11 @@ char* get_unread_messages( FILE* message_history, char** last_seen_message ){
     return get_history( message_history, &search_history, ALL_UNREAD_SMS );
 }
 
-database_err unread_messages( FILE* message_history, history_t* history_info, search_history_t* search_history ){
+database_err_t unread_messages( FILE* message_history, history_t* history_info, search_history_t* search_history ){
     assert( message_history );
     assert( history_info );
 
-    database_err read_status = scan_unread_message( message_history, history_info, search_history );
+    database_err_t read_status = scan_unread_message( message_history, history_info, search_history );
     if( read_status != SUCCESS ){
         log_panic( "scan_unread_message returned null ptr" );
         return read_status;
@@ -246,7 +273,7 @@ database_err unread_messages( FILE* message_history, history_t* history_info, se
     return SUCCESS;
 }
 
-database_err scan_unread_message( FILE* message_history, history_t* history_info, search_history_t* search_history ){
+database_err_t scan_unread_message( FILE* message_history, history_t* history_info, search_history_t* search_history ){
     assert( message_history );
     assert( history_info );
 
@@ -286,11 +313,11 @@ database_err scan_unread_message( FILE* message_history, history_t* history_info
     return SUCCESS;
 }
 
-database_err all_messages( FILE* message_history, history_t* history_info ){
+database_err_t all_messages( FILE* message_history, history_t* history_info ){
     assert( message_history );
     assert( history_info );
 
-    database_err read_status = read_all_messages( message_history, history_info );
+    database_err_t read_status = read_all_messages( message_history, history_info );
     if( read_status != SUCCESS ){
         log_panic( "read_all_messages returned null ptr" );
         return read_status;
@@ -298,7 +325,7 @@ database_err all_messages( FILE* message_history, history_t* history_info ){
     return SUCCESS;
 }
 
-database_err read_all_messages( FILE* message_history, history_t* history_info ){
+database_err_t read_all_messages( FILE* message_history, history_t* history_info ){
     assert( message_history );
     assert( history_info );
 

@@ -1,27 +1,12 @@
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef CHAT_COMMANDS_H
+#define CHAT_COMMANDS_H
 
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
-#include <uv.h>
 
 #include "logging.h"
-
-typedef struct client_info_s {
-    uv_tcp_t handle;
-    char* buf;
-    char* last_seen_message;
-    size_t capacity;
-    size_t len;
-    bool is_stopped;
-    bool in_room;
-} client_t;
-
-typedef struct command_map_s{
-    const char* command_name;
-    error (*cmd)(client_t* client, const char* string );
-} command_map_t;
+#include "server_functions.h"
 
 typedef struct description_room_s {
     char* room_name;
@@ -42,21 +27,19 @@ ssize_t clients_allocation( room_t* room, ssize_t client_index );
 
 void destroy_rooms();
 
+void removing_client( client_t* client );
+
 void destroy_single_room( room_t* room );
 
 void connection_cb( uv_stream_t* server, int status );
 
-void sending_instruction( client_t* client );
-
-void client_init( client_t* client );
-
 void shutdown_cb( uv_shutdown_t* shutdown_req, int status );
 
-void close_cb( uv_handle_t* handle );
+void sending_instruction( client_t* client );
 
-void removing_client( client_t* client );
+void chat_alloc_cb( uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf );
 
-void alloc_cb( uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf );
+error memory_realloc( client_t* client, size_t suggested_size );
 
 void read_cb( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf );
 
@@ -88,10 +71,18 @@ error cmd_week( client_t* client, const char* string );
 
 error cmd_history( client_t* client, const char* string );
 
-void client_send(client_t* client, const char* format, ... );
+error cmd_file_name( client_t* client, const char* string );
+
+error cmd_bot_reg( client_t* client, const char* string );
+
+error cmd_bot_file( client_t* client, const char* string );
+
+room_t* get_room( client_t* client );
+
+void client_send( client_t* client_stream, const char* format, ... );
 
 void write_cb( uv_write_t* write_req, int status );
 
-room_t* get_room( client_t* client );
+void close_cb( uv_handle_t* handle );
 
 #endif

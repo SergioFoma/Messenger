@@ -1,3 +1,7 @@
-Client/Build
-Server/Build
-
+Server/Build/
+Client/Build/
+Application/
+*.json
+*.cache
+ML/__pycache__
+*.npz

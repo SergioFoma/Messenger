@@ -4,13 +4,16 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "commands.h"
+#include "chat_commands.h"
 #include "logging.h"
 #include "database.h"
+#include "file_commands.h"
+#include "server_functions.h"
 
-const size_t ONE = 1;                                                               //for calloc
-const size_t INIT_ROOMS_NUMBER = 10;                                                //for initialization array with rooms
-const size_t INIT_CLIENT_NUMBER = 10;                                               //for initialization array with clients
+static const size_t ONE = 1;                                                               //for calloc
+static const size_t INIT_ROOMS_NUMBER = 10;                                                //for initialization array with rooms
+static const size_t INIT_CLIENT_NUMBER = 10;                                               //for initialization array with clients
+static const char* bot_token = "adfd7429-0e16-450e-8acf-670a3346cae8";			   // for chat bot
 
 /*The array with commands is designed so that the length of commands increases,
  *so the shortest length is the length of the first command( command_map[0] )
@@ -21,17 +24,20 @@ const command_map_t command_map[] = {
     { "/join"       ,   cmd_join        },
     { "/list"       ,   cmd_list        },
     { "/stop"       ,   cmd_stop        },
+    { "/file"       ,   cmd_file_name   },
     { "/leave"      ,   cmd_leave       },
     { "/today"      ,   cmd_today       },
+    { "/history"    ,   cmd_history     },
     { "/yesterday"  ,   cmd_yesterday   },
-    { "/history"    ,   cmd_history     }
+    { "/bot_reg"    ,   cmd_bot_reg 	},
+    { "/bot_file"   ,   cmd_bot_file    }
 };
-const size_t command_map_capacity = sizeof(command_map) / sizeof(command_map_t);
-const size_t MIN_COMMAND_SIZE = strlen(command_map[0].command_name) - 1;
+static const size_t command_map_capacity = sizeof(command_map) / sizeof(command_map_t);
+static const long int MIN_COMMAND_SIZE = 5;
 
 // array of pointers to rooms and its size
 room_t** rooms = NULL;
-size_t room_capacity = 0;
+static size_t room_capacity = 0;
 
 error init_rooms(){
 
@@ -48,9 +54,14 @@ error init_single_room( room_t** room ){
     assert( room );
 
     *room = (room_t*)calloc( ONE, sizeof(room_t) );
+    if( *room == NULL ){
+        log_error( "error initializing dingle room" );
+        return MEMORY_ALLOC_ERR;
+    }
     (*room)->clients_array = (client_t**)calloc( INIT_CLIENT_NUMBER, sizeof(client_t*) );      //At the beginning, all pointers to clients are null.
     if( (*room)->clients_array == NULL ){
-        log_panic( "error initializing clients in single room" );
+        log_error( "error initializing clients in single room" );
+        free( *room );
         return MEMORY_ALLOC_ERR;
     }
     (*room)->capacity = INIT_CLIENT_NUMBER;
@@ -69,11 +80,12 @@ ssize_t rooms_allocation( ssize_t room_index ){
 
     room_index = room_capacity;                                                                            // pointer to the first free space
     room_capacity *= 2;
-    rooms = (room_t**)realloc( rooms, room_capacity * sizeof(room_t*) );                                      // realloc does not init data
-    if( rooms == NULL ){
-        log_panic( "room reallocation error" );
+    room_t** realloc_check = (room_t**)realloc( rooms, room_capacity * sizeof(room_t*) );                  // realloc does not init data
+    if( realloc_check == NULL ){
+        log_error( "room reallocation error" );
         return -1;
     }
+    rooms = realloc_check;
 
     size_t current_room = room_index;
     for( ; current_room < room_capacity; current_room++ ){
@@ -106,99 +118,6 @@ ssize_t clients_allocation( room_t* room, ssize_t client_index ){
     return client_index;
 }
 
-void destroy_rooms(){
-
-    size_t room_index = 0;
-    for( ; room_index < room_capacity; room_index++ ){
-        destroy_single_room( rooms[room_index] );
-        rooms[room_index] = NULL;
-    }
-
-    free( rooms );
-}
-
-void destroy_single_room( room_t* room ){
-    assert( room );
-
-    room->capacity = 0;
-    room->user_counter = 0;
-    room->room_name = NULL;
-    free( room->clients_array );
-    fclose( room->message_history );
-    free( room );
-}
-
-void connection_cb( uv_stream_t* server, int status ){
-    assert( server );
-
-    client_t* client = (client_t*)calloc( ONE, sizeof(client_t) );
-    if( client == NULL ){
-        log_error( "can not allocate memory for client" );
-        return ;
-    }
-
-    client_init( client );
-    uv_tcp_init( server->loop, &client->handle );                                                        //descriptor initialization
-    client->handle.data = client;
-    int accept_status = uv_accept( server, (uv_stream_t*)&client->handle );                              //communication between the client socket and the server socket
-    if( accept_status < 0 ){
-        log_error( "can not accept" );
-        uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
-        uv_shutdown( shutdown_req, (uv_stream_t*)&client->handle, shutdown_cb );                         //closing connection
-        return ;
-    }
-
-    sending_instruction( client );
-    uv_read_start( (uv_stream_t*)&client->handle, alloc_cb, read_cb );                                   //starting an asynchronous connection
-}
-
-void sending_instruction( client_t* client ){
-    assert( client );
-
-    client_send( client, "Welcome to our messenger. You can:\n"
-                         "/join [room_name] - join a room with name [room_name]\n"
-                         "/list - find out the name of the room you are in and the number of participants\n"
-                         "/today - show the group's message history for the current day\n"
-                         "/yesterday - show the group's message history for yesterday\n"
-                         "/week - show the group's message history for the last week\n"
-                         "/history - show all unread messages\n"
-                         "/leave - leave the current room\n"
-                         "/stop - log out of the messenger\n\n" );
-}
-
-void client_init( client_t* client ){
-    assert( client );
-
-    client->capacity = 0;
-    client->buf = NULL;
-    client->last_seen_message = NULL;
-    client->len = 0;
-    client->is_stopped = false;
-    client->in_room = false;
-}
-
-void shutdown_cb( uv_shutdown_t* shutdown_req, int status ){
-    assert( shutdown_req );
-
-    if( !uv_is_closing( (uv_handle_t*)shutdown_req->handle ) ){
-        uv_close( (uv_handle_t*)shutdown_req->handle, close_cb );                                       //closing a socket
-    }
-    free( shutdown_req );
-}
-
-void close_cb( uv_handle_t* handle ){
-    assert( handle );
-
-    client_t* client = (client_t*)handle->data;
-    if( client->buf ){
-        free( client->buf );
-    }
-    if( client->last_seen_message ){
-        free( client->last_seen_message );
-    }
-    removing_client( client );
-}
-
 void removing_client( client_t* client ){
     assert( client );
 
@@ -221,25 +140,119 @@ void removing_client( client_t* client ){
     free( client );
 }
 
-void alloc_cb( uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf ){
+void destroy_rooms(){
+
+    size_t room_index = 0;
+    for( ; room_index < room_capacity; room_index++ ){
+        destroy_single_room( rooms[room_index] );
+        rooms[room_index] = NULL;
+    }
+
+    free( rooms );
+}
+
+void destroy_single_room( room_t* room ){
+    assert( room );
+
+    room->capacity = 0;
+    room->user_counter = 0;
+    room->room_name = NULL;
+    free( room->clients_array );
+    fclose( room->message_history );
+    free( room );
+}
+
+void shutdown_cb( uv_shutdown_t* shutdown_req, int status ){
+    assert( shutdown_req );
+
+    if( !uv_is_closing( (uv_handle_t*)shutdown_req->handle ) ){
+        uv_close( (uv_handle_t*)shutdown_req->handle, close_cb );                                       //closing a socket
+    }
+    free( shutdown_req );
+}
+
+void connection_cb( uv_stream_t* server, int status ){
+    assert( server );
+
+    client_t* client = (client_t*)calloc( ONE, sizeof(client_t) );
+    if( client == NULL ){
+        log_error( "can not allocate memory for client" );
+        return ;
+    }
+
+    client_init( client );
+    uv_tcp_init( server->loop, &client->handle );                                                        //descriptor initialization
+    client->handle.data = client;
+    int accept_status = uv_accept( server, (uv_stream_t*)&client->handle );                              //communication between the client socket and the server socket
+    if( accept_status < 0 ){
+        log_error( "can not accept" );
+        uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
+        if( uv_shutdown( shutdown_req, (uv_stream_t*)&client->handle, shutdown_cb ) < 0 ){                //closing connection
+            log_panic( "shutdown return negative value" );
+            free( shutdown_req );
+            free( client );
+        }
+        return ;
+    }
+
+    log_info( "new client successfully connected" );
+    uv_read_start( (uv_stream_t*)&client->handle, chat_alloc_cb, read_cb );                                //starting an asynchronous reading
+}
+
+void sending_instruction( client_t* client ){
+    assert( client );
+
+    client_send( client, "Welcome to our messenger. You can:\n"
+                      "/join [room_name] - join a room with name [room_name]\n"
+                      "/list - find out the name of the room you are in and the number of participants\n"
+                      "/today - show the group's message history for the current day\n"
+                      "/yesterday - show the group's message history for yesterday\n"
+                      "/week - show the group's message history for the last week\n"
+                      "/history - show all unread messages\n"
+                      "/leave - leave the current room\n"
+                      "/stop - log out of the messenger\n\n" );
+}
+
+void chat_alloc_cb( uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf ){
     assert( handle );
     assert( buf );
 
     client_t* client = (client_t*)handle->data;
+    size_t predicted_size = client->len + suggested_size + 1;
     if( client->capacity > 0 ){
-        if( client->capacity < suggested_size + client->len ){
-            client->buf = (char*)realloc( client->buf, client->len + suggested_size );
+        if( memory_realloc( client, predicted_size ) == MEMORY_REALLOC_ERR ){
+            return ;
         }
     }
     else{
-        client->buf = (char*)calloc( suggested_size, sizeof(char) );
+        client->buf = (char*)calloc( predicted_size, sizeof(char) );
+        if( !client->buf ){
+            log_panic( "error allocating memory for the client buffer" );
+            return ;
+        }
     }
 
-    client->capacity = client->capacity >= client->len + suggested_size
+    client->capacity = client->capacity >= predicted_size
                        ? client->capacity
-                       : client->len + suggested_size;
+                       : predicted_size;
     buf->base = client->buf + client->len;
-    buf->len = suggested_size;
+    buf->len = client->capacity - client->len - 1;
+}
+
+error memory_realloc( client_t* client, size_t predicted_size ){
+    assert( client );
+
+    char* helpful_buffer = NULL;
+    if( client->capacity < predicted_size ){
+        helpful_buffer = (char*)realloc( client->buf, predicted_size );
+        if( !helpful_buffer ){
+            log_panic( "realloc returned null ptr" );
+            return MEMORY_REALLOC_ERR;
+        }
+        client->buf = helpful_buffer;
+    }
+
+    return CORRECT;
 }
 
 void read_cb( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf ){
@@ -255,7 +268,10 @@ void read_cb( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf ){
 
     log_warning( "client closed connection" );
     uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
-    uv_shutdown( shutdown_req, handle, shutdown_cb );
+    if( uv_shutdown( shutdown_req, handle, shutdown_cb ) < 0 ){
+        log_panic( "shutdown return negative value" );
+        free( shutdown_req );
+    }
 }
 
 void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* client, const char* string ) ){
@@ -324,16 +340,18 @@ error send_message( client_t* client, const char* string ){
 
     size_t client_capacity = client_room->capacity;
     client_t** client_beginning = client_room->clients_array;
-    client_t** current_client = client_beginning;
-    for( ; current_client < client_beginning + client_capacity; current_client++ ){
-        if( !(*current_client) || client == *current_client || (*current_client)->in_room == false ){          // sending a message to others client
+    client_t** current_client_ptr = client_beginning;
+    client_t* current_client = NULL;
+    for( ; current_client_ptr < client_beginning + client_capacity; current_client_ptr++ ){
+        current_client = *current_client_ptr;
+        if( !current_client || client == current_client || current_client->in_room == false ){              // sending a message to others client
             continue;
         }
-        client_send( *current_client, "%s\n", string );
-        if( (*current_client)->last_seen_message != NULL ){
-            free( (*current_client)->last_seen_message );                                                      // delete the previous message
+        client_send( current_client, "%s\n", string );
+        if( current_client->last_seen_message != NULL ){
+            free( current_client->last_seen_message );                                                      // delete the previous message
         }
-        (*current_client)->last_seen_message = strdup( string );                                               // save new message
+        current_client->last_seen_message = strdup( string );                                               // save new message
     }
 
     if( client->last_seen_message != NULL ){
@@ -428,10 +446,9 @@ error cmd_list( client_t* client, const char* string ){
         return NULL_PTR;
     }
 
-    client_send( client, "\n"
-                         "you are in the room: %s\n"
-                         "number of clients in room: %lu\n\n",
-                         client_room->room_name, client_room->user_counter );
+    client_send( client, "you are in the room: %s\n"
+                      "number of clients in room: %lu",
+                      client_room->room_name, client_room->user_counter );
     return CORRECT;
 }
 
@@ -496,7 +513,7 @@ room_t* get_room( client_t* client ){
         }
     }
     return NULL;
-}
+} 
 
 error cmd_today( client_t* client, const char* string ){
     assert( client );
@@ -513,8 +530,13 @@ error cmd_today( client_t* client, const char* string ){
         log_error( "error getting message history" );
         return NULL_PTR;
     }
+    if( strlen( message_history ) == 0 ){
+        client_send( client, "No messages for today" );
+    }
+    else{
+    	client_send( client, "%s", message_history );
+    }
 
-    client_send( client, "__________Today's message history______\n%s\n\n", message_history );
     free( message_history );
     return CORRECT;
 }
@@ -523,6 +545,7 @@ error cmd_yesterday( client_t* client, const char* string ){
     assert( client );
     assert( string );
 
+    log_debug( "in function: yesterday" );
     room_t* client_room = get_room( client );
     if( client_room == NULL ){
         log_warning( "client_room is null ptr" );
@@ -534,8 +557,13 @@ error cmd_yesterday( client_t* client, const char* string ){
         log_error( "error getting message history" );
         return NULL_PTR;
     }
+    if( strlen( message_history ) == 0 ){
+    	client_send( client, "No messages for yesterday" );
+    }
+    else{
+	    client_send( client, "%s", message_history );
+    }
 
-    client_send( client, "__________History of yesterday's messages______\n%s\n\n", message_history );
     free( message_history );
     return CORRECT;
 };
@@ -555,8 +583,13 @@ error cmd_week( client_t* client, const char* string ){
         log_error( "error getting message history" );
         return NULL_PTR;
     }
+    if( strlen( message_history ) == 0 ){
+        client_send( client, "No messages for week" );
+    }
+    else{
+    	client_send( client, "%s", message_history );
+    }
 
-    client_send( client, "__________Message history for the week______\n%s\n\n", message_history );
     free( message_history );
     return CORRECT;
 }
@@ -576,13 +609,69 @@ error cmd_history( client_t* client, const char* string ){
         log_error( "error getting message history" );
         return NULL_PTR;
     }
-
-    client_send( client, "__________All unread messages______\n%s\n\n", message_history );
+    if( strlen( message_history ) == 0 ){
+        client_send( client, "You read all messages" );
+    }
+    else{
+    	client_send( client, "%s", message_history );
+    }
     free( message_history );
     return CORRECT;
 }
 
-void client_send(client_t* client, const char* format, ... ){
+error cmd_file_name( client_t* client, const char* string ){
+    assert( client );
+    assert( string );
+
+    room_t* client_room = get_room( client );
+    if( client_room == NULL ){
+        log_warning( "client_room is null ptr" );
+        return NULL_PTR;
+    }
+
+    const char* file_name = strchr( string, ' ' ) + 1;
+    log_debug( "in cmd_file_name, file_name = '%s'", file_name );
+    unsigned long transfer_id = hash( file_name );
+    add_transfer( transfer_id, file_name );
+
+    client_t** client_begining = client_room->clients_array;
+    client_t** current_client_ptr = client_begining;
+    client_t* current_client = NULL;
+    size_t capacity = client_room->capacity;
+    for(; current_client_ptr < client_begining + capacity; current_client_ptr++ ){
+        current_client = *current_client_ptr;
+        if( current_client && current_client != client ){
+            client_send( current_client, "/recipients_ID %lu\n", transfer_id );
+        }
+    }
+
+    client_send( client, "/sender_ID %lu\n", transfer_id );
+    return CORRECT;
+}
+
+error cmd_bot_reg( client_t* client, const char* string ){
+    assert( client  );
+    assert( string );
+
+    const char* whitespace = strchr( string, ' ' );
+    const char* token = whitespace + 1;
+
+    if( strncmp( token, bot_token, strlen( bot_token ) ) != 0 ){
+	log_error( "the bot's token is invalid" );
+	return BOT_REG_ERR;
+    }
+
+    client->is_bot = true;
+    return CORRECT;
+}
+
+// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+error cmd_bof_file( client_t* client, const char* string ){
+   assert( client );
+   assert( string );
+}
+
+void client_send( client_t* client, const char* format, ... ){
     assert( client );
     assert( format );
 
@@ -596,20 +685,44 @@ void client_send(client_t* client, const char* format, ... ){
 
     uv_write_t* req = (uv_write_t*)calloc( ONE, sizeof(uv_write_t) );
     req->data = buffer.base;
-    uv_write( req, (uv_stream_t*)(&client->handle), &buffer, ONE, write_cb );                           //writing data to descriptor
+    if( uv_write( req, (uv_stream_t*)&client->handle, &buffer, ONE, write_cb ) < 0 ){                                  //writing data to descriptor
+        log_panic( "write return negative value" );
+        free( buffer.base );
+        free( req );
+    }
 }
 
 void write_cb( uv_write_t* write_req, int status ){
     assert( write_req );
+
     if( status < 0 ){
         log_error( "can not write message" );
+        free( write_req->data );
+        free( write_req );
         return ;
     }
 
-    free( write_req->data );
     client_t* client = (client_t*)write_req->handle;
     if( client->is_stopped ){
         uv_close( (uv_handle_t*)client, close_cb );
     }
+    free( write_req->data );
     free( write_req );
+}
+
+void close_cb( uv_handle_t* handle ){
+    assert( handle );
+
+    client_t* client = (client_t*)handle->data;
+    if( client->buf ){
+        free( client->buf );
+    }
+    if( client->file_buf ){
+        free( client->file_buf );
+    }
+    if( client->last_seen_message ){
+        free( client->last_seen_message );
+    }
+
+    removing_client( client );
 }
