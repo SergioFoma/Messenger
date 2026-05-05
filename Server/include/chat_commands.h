@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <time.h>
 
 #include "logging.h"
 #include "server_functions.h"
@@ -16,6 +15,11 @@ typedef struct description_room_s {
     size_t user_counter;                    // number of active users
     int write_fd;                           // file descriptor for writing messages
 } room_t;
+
+typedef struct command_map_s{
+    const char* command_name;
+    error (*cmd)( client_t* client, char* string );
+} command_map_t;
 
 error init_rooms();
 
@@ -43,39 +47,41 @@ error memory_realloc( client_t* client, size_t suggested_size );
 
 void read_cb( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf );
 
-void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* client, const char* string ) );
+void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* client, char* string ) );
 
-void parse_command( client_t* client, const char* string );
+void parse_command( client_t* client, char* string );
 
-error send_message( client_t* client, const char* string );
+error send_message( client_t* client, char* string );
 
-error cmd_join( client_t* client, const char* string );
+error cmd_join( client_t* client, char* string );
 
-bool room_search( client_t* client,  const char* room_name );
+bool room_search( client_t* client,  char* room_name );
 
 ssize_t get_free_room();
 
 ssize_t get_free_client( room_t* room );
 
-error cmd_list( client_t* client, const char* string );
+error cmd_list( client_t* client, char* string );
 
-error cmd_leave( client_t* client, const char* string );
+error cmd_leave( client_t* client, char* string );
 
-error cmd_stop( client_t* client, const char* string );
+error cmd_stop( client_t* client, char* string );
 
-error cmd_today( client_t* client, const char* string );
+error cmd_today( client_t* client, char* string );
 
-error cmd_yesterday( client_t* client, const char* string );
+error cmd_yesterday( client_t* client, char* string );
 
-error cmd_week( client_t* client, const char* string );
+error cmd_week( client_t* client, char* string );
 
-error cmd_history( client_t* client, const char* string );
+error cmd_history( client_t* client, char* string );
 
-error cmd_file_name( client_t* client, const char* string );
+error cmd_file_name( client_t* client, char* string );
 
-error cmd_bot_reg( client_t* client, const char* string );
+error inform_recipients( client_t* client, char* string );
 
-error cmd_bot_file( client_t* client, const char* string );
+error cmd_bot_reg( client_t* client, char* string );
+
+error cmd_bot_file( client_t* client, char* string );
 
 room_t* get_room( client_t* client );
 

@@ -13,6 +13,7 @@
 static const size_t ONE = 1;                                                               //for calloc
 static const size_t INIT_ROOMS_NUMBER = 10;                                                //for initialization array with rooms
 static const size_t INIT_CLIENT_NUMBER = 10;                                               //for initialization array with clients
+static const size_t DEC = 10;								   // for strtoul
 static const char* bot_token = "adfd7429-0e16-450e-8acf-670a3346cae8";			   // for chat bot
 
 /*The array with commands is designed so that the length of commands increases,
@@ -20,17 +21,18 @@ static const char* bot_token = "adfd7429-0e16-450e-8acf-670a3346cae8";			   // f
 */
 
 const command_map_t command_map[] = {
-    { "/week"       ,   cmd_week        },
-    { "/join"       ,   cmd_join        },
-    { "/list"       ,   cmd_list        },
-    { "/stop"       ,   cmd_stop        },
-    { "/file"       ,   cmd_file_name   },
-    { "/leave"      ,   cmd_leave       },
-    { "/today"      ,   cmd_today       },
-    { "/history"    ,   cmd_history     },
-    { "/yesterday"  ,   cmd_yesterday   },
-    { "/bot_reg"    ,   cmd_bot_reg 	},
-    { "/bot_file"   ,   cmd_bot_file    }
+    { "/week"       	,   cmd_week        	},
+    { "/join"       	,   cmd_join        	},
+    { "/list"       	,   cmd_list        	},
+    { "/stop"       	,   cmd_stop        	},
+    { "/file"       	,   cmd_file_name   	},
+    { "/leave"      	,   cmd_leave       	},
+    { "/today"      	,   cmd_today       	},
+    { "/history"    	,   cmd_history     	},
+    { "/yesterday"  	,   cmd_yesterday   	},
+    { "/bot_reg"    	,   cmd_bot_reg     	},
+    { "/bot_file"   	,   cmd_bot_file    	},
+    { "/recipients_ID"	,   inform_recipients	}
 };
 static const size_t command_map_capacity = sizeof(command_map) / sizeof(command_map_t);
 static const long int MIN_COMMAND_SIZE = 5;
@@ -274,7 +276,7 @@ void read_cb( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf ){
     }
 }
 
-void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* client, const char* string ) ){
+void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* client, char* string ) ){
     assert( client );
 
     char* buf_start = client->buf;
@@ -305,7 +307,7 @@ void parse_buffer( client_t* client, ssize_t nread, void (*on_cmd)( client_t* cl
     log_info( "string line after: %lu", client->len );
 }
 
-void parse_command( client_t* client, const char* string ){
+void parse_command( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -327,7 +329,7 @@ void parse_command( client_t* client, const char* string ){
     client_send( client, "Unknown command: %s\n", string );
 }
 
-error send_message( client_t* client, const char* string ){
+error send_message( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -362,7 +364,7 @@ error send_message( client_t* client, const char* string ){
     return CORRECT;
 }
 
-error cmd_join( client_t* client, const char* string ){
+error cmd_join( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -391,7 +393,7 @@ error cmd_join( client_t* client, const char* string ){
     return CORRECT;
 }
 
-bool room_search( client_t* client,  const char* room_name ){
+bool room_search( client_t* client,  char* room_name ){
     assert( client );
     assert( room_name );
 
@@ -435,7 +437,7 @@ ssize_t get_free_client( room_t* room ){
     return -1;
 }
 
-error cmd_list( client_t* client, const char* string ){
+error cmd_list( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -452,7 +454,7 @@ error cmd_list( client_t* client, const char* string ){
     return CORRECT;
 }
 
-error cmd_leave( client_t* client, const char* string ){
+error cmd_leave( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -479,7 +481,7 @@ error cmd_leave( client_t* client, const char* string ){
     return SEARCH_ERROR;
 }
 
-error cmd_stop( client_t* client, const char* string ){
+error cmd_stop( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -515,7 +517,7 @@ room_t* get_room( client_t* client ){
     return NULL;
 } 
 
-error cmd_today( client_t* client, const char* string ){
+error cmd_today( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -541,7 +543,7 @@ error cmd_today( client_t* client, const char* string ){
     return CORRECT;
 }
 
-error cmd_yesterday( client_t* client, const char* string ){
+error cmd_yesterday( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -568,7 +570,7 @@ error cmd_yesterday( client_t* client, const char* string ){
     return CORRECT;
 };
 
-error cmd_week( client_t* client, const char* string ){
+error cmd_week( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -594,7 +596,7 @@ error cmd_week( client_t* client, const char* string ){
     return CORRECT;
 }
 
-error cmd_history( client_t* client, const char* string ){
+error cmd_history( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -619,7 +621,7 @@ error cmd_history( client_t* client, const char* string ){
     return CORRECT;
 }
 
-error cmd_file_name( client_t* client, const char* string ){
+error cmd_file_name( client_t* client, char* string ){
     assert( client );
     assert( string );
 
@@ -629,10 +631,9 @@ error cmd_file_name( client_t* client, const char* string ){
         return NULL_PTR;
     }
 
-    const char* file_name = strchr( string, ' ' ) + 1;
+    char* file_name = strchr( string, ' ' ) + 1;
     log_debug( "in cmd_file_name, file_name = '%s'", file_name );
     unsigned long transfer_id = hash( file_name );
-    add_transfer( transfer_id, file_name );
 
     client_t** client_begining = client_room->clients_array;
     client_t** current_client_ptr = client_begining;
@@ -649,7 +650,39 @@ error cmd_file_name( client_t* client, const char* string ){
     return CORRECT;
 }
 
-error cmd_bot_reg( client_t* client, const char* string ){
+error inform_recipients( client_t* client, char* string ){
+    assert( client );
+    assert( string );
+
+    room_t* client_room = get_room( client );
+    if( client_room == NULL ){
+	log_warning( "client_room is null ptr" );
+	return NULL_PTR;
+    }
+
+    char* first_wh = strchr( string, ' ' );
+    char* second_wh = strchr( first_wh + 1, ' ' );
+    *second_wh = '\0';
+    unsigned long transfer_id = strtoul( first_wh + 1, NULL, DEC );
+    char* file_name = second_wh + 1;
+    
+    client->transfer_id = transfer_id;
+    client->file_name = strdup( file_name );
+
+    client_t** client_begining = client_room->clients_array;
+    client_t** current_client_ptr = client_begining;
+    client_t* current_client = NULL;
+    size_t capacity = client_room->capacity;
+    for(; current_client_ptr < client_begining + capacity; current_client_ptr++ ){
+	current_client = *current_client_ptr;
+	if( current_client && current_client != client ){
+	    client_send( current_client, "/recipients_ID %lu %s\n", transfer_id, file_name );
+	}
+    }
+    return CORRECT;
+}
+
+error cmd_bot_reg( client_t* client, char* string ){
     assert( client  );
     assert( string );
 
@@ -666,9 +699,11 @@ error cmd_bot_reg( client_t* client, const char* string ){
 }
 
 // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-error cmd_bof_file( client_t* client, const char* string ){
+error cmd_bot_file( client_t* client, char* string ){
    assert( client );
    assert( string );
+
+   return CORRECT;
 }
 
 void client_send( client_t* client, const char* format, ... ){
@@ -716,12 +751,19 @@ void close_cb( uv_handle_t* handle ){
     client_t* client = (client_t*)handle->data;
     if( client->buf ){
         free( client->buf );
+	client->buf = NULL;
     }
     if( client->file_buf ){
         free( client->file_buf );
+	client->file_buf = NULL;
     }
     if( client->last_seen_message ){
         free( client->last_seen_message );
+	client->last_seen_message = NULL;
+    }
+    if( client->file_name ){
+	free( client->file_name );
+	client->file_name = NULL;
     }
 
     removing_client( client );

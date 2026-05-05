@@ -1,154 +1,36 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <dirent.h>
 
 #include "file_commands.h"
+#include "chat_commands.h"
 #include "logging.h"
 
 static const size_t ONE = 1;
+static const size_t TWO = 2;
 static const size_t INIT_NUM = 5;
 static const size_t DEC = 10;
+static const size_t MAX_TIME_LEN = 20;		     // for time( NULL ) - max count of digits in number
+static const size_t EXTRA_SPACE = 5;                 // for snprint
+static const size_t AUTO_BASE = 0;		     // for strtoul
+static const int FILE_MOD = 0644;
+static const size_t BUFFERS_COUNT = 1;		     // for fs_write
+static const size_t MAX_DIGITS = 100;		     // for snprintf
+static const size_t PART_SIZE = 8192;		     
+const char* CHUNK_PATH = "Transfers";
 
-command_map_t supported_commands[] = {
-    { "/sender_connected"        ,       init_sender     	},
-    { "/destroy_transfer"	 ,	 destroy_channel	},
-    { "/receive_connected"       ,       init_recipient  	},
-    { "/recipient_accepted"	 ,	 send_agreement  	},
-    { "/recipient_not_accepted"	 ,	 get_refusal		}
+chunk_command_t supported_commands[] = {
+    { "/ok"			 ,	 send_chunk		},
+    { "/chunk"			 ,	 save_chunk 		},
+    { "/store"        	 	 ,       init_sender     	},
+    { "/retrieve"		 , 	 init_recipient	 	}
 };
-size_t commands_count = sizeof(supported_commands) / sizeof(command_map_t);
-static const long int MIN_COMMAND_SIZE = 17;
-
-file_transfer_t** transfer_array = NULL;
-size_t transfer_array_cap = 0;
-
-error init_transfers(){
-
-    if( transfer_array == NULL ){
-        transfer_array = (file_transfer_t**)calloc( INIT_NUM, sizeof(file_transfer_t*) );
-        if( transfer_array == NULL ){
-            log_panic( "calloc return null ptr" );
-            return MEMORY_ALLOC_ERR;
-        }
-        transfer_array_cap = INIT_NUM;
-    }
-
-    log_info( "init transfer array" );
-    return CORRECT;
-}
-
-error add_transfer( unsigned long transfer_id, const char* file_name ){
-    assert( file_name );
-
-    init_transfers();
-
-    ssize_t free_index = find_free_transfer();
-    free_index = realloc_transfers( free_index );
-    if( free_index == -1 ){
-        log_error( "error adding transfer" );
-        return ADD_TRANSFER_ERR;
-    }
-
-    init_one_transfer( transfer_array + free_index, transfer_id, file_name );
-    return CORRECT;
-}
-
-ssize_t find_free_transfer(){
-
-    size_t transfer_index = 0;
-    for(; transfer_index < transfer_array_cap; transfer_index++ ){
-        if( transfer_array[transfer_index] == NULL ){
-            log_debug( "free index in transfer array: %lu", transfer_index );
-            return transfer_index;
-        }
-    }
-
-    log_warning( "there are no elements in transfer array" );
-    return -1;
-}
-
-ssize_t realloc_transfers( ssize_t free_index ){
-
-    if( free_index != -1 ){
-        return free_index;
-    }
-
-    size_t old_capacity = transfer_array_cap;
-
-    transfer_array_cap *= 2;
-    file_transfer_t** check_realloc = (file_transfer_t**)realloc( transfer_array, sizeof(file_transfer_t*) * transfer_array_cap );
-    if( check_realloc == NULL ){
-        log_error( "realloc returned null ptr" );
-        return -1;
-    }
-
-    size_t free_elem = old_capacity;
-    transfer_array = check_realloc;
-    for(; free_elem < transfer_array_cap; free_elem++ ){
-        transfer_array[free_elem] = NULL;
-    }
-    return old_capacity;
-}
-
-error init_one_transfer( file_transfer_t** transfer, unsigned long transfer_id, const char* file_name ){
-    assert( transfer );
-    assert( file_name );
-
-    *transfer = (file_transfer_t*)calloc( ONE, sizeof(file_transfer_t) );
-    if( *transfer == NULL ){
-        log_error( "calloc return null ptr" );
-        return MEMORY_ALLOC_ERR;
-    }
-
-    (*transfer)->transfer_id = transfer_id;
-    (*transfer)->file_name = file_name;
-    (*transfer)->recipient_handles = (uv_tcp_t**)calloc( ONE, sizeof(uv_tcp_t*) );
-    (*transfer)->recipients_capacity = ONE;
-    (*transfer)->open_files = (uv_tcp_t**)calloc( ONE, sizeof(uv_tcp_t*) );
-    (*transfer)->open_files_cap = ONE;
-    (*transfer)->recipients_count = 0;							// no one has connected yet
-    (*transfer)->accepted_number = 0;							// no one to agreed download fine
-    (*transfer)->not_accepted_number = 0;						// no one to disagreed download file
-    return CORRECT;
-}
-
-ssize_t realloc_recipients( file_transfer_t* transfer, ssize_t free_index ){
-    assert( transfer );
-
-    if( free_index != -1 ){
-        return free_index;
-    }
-
-    size_t old_numbers = transfer->recipients_capacity;
-
-    transfer->recipients_capacity *= 2;
-    uv_tcp_t** realloc_ptr = (uv_tcp_t**)realloc( transfer->recipient_handles, transfer->recipients_capacity * sizeof(uv_tcp_t*) );
-    if( realloc_ptr == NULL ){
-        log_panic( "realloc return null ptr" );
-        return -1;
-    }
-
-    size_t free_elem = old_numbers;
-    size_t new_number = transfer->recipients_capacity;
-    for(; free_elem < new_number; free_elem++ ){
-        realloc_ptr[free_elem] = NULL;
-    }
-    transfer->recipient_handles = realloc_ptr;
-    return old_numbers;
-}
-
-void destroy_transfers(){
-
-    size_t transfer_index = 0;
-    for(; transfer_index < transfer_array_cap; transfer_index++ ){
-        if( transfer_array[transfer_index] ){
-            free( transfer_array[transfer_index] );
-        }
-    }
-    free( transfer_array );
-}
+size_t commands_count = sizeof(supported_commands) / sizeof(chunk_command_t);
+static const long int MIN_COMMAND_SIZE = 3;
 
 void connect_file_channel( uv_stream_t* server, int status ){
     assert( server );
@@ -184,7 +66,7 @@ void file_alloc_cb( uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf ){
 
     client_t* client = (client_t*)handle->data;
     size_t predicted_size = client->file_len + suggested_size + 1;
-    if( client->file_capacity > 0 ){
+    if( client->file_buf_cap > 0 ){
         if( realloc_file_buf( client, predicted_size ) == MEMORY_REALLOC_ERR ){
             return ;
         }
@@ -197,18 +79,18 @@ void file_alloc_cb( uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf ){
         }
     }
 
-    client->file_capacity = client->file_capacity >= predicted_size
-                       ? client->file_capacity
+    client->file_buf_cap = client->file_buf_cap >= predicted_size
+                       ? client->file_buf_cap
                        : predicted_size;
     buf->base = client->file_buf + client->file_len;
-    buf->len = client->file_capacity - client->file_len - 1;
+    buf->len = client->file_buf_cap - client->file_len - 1;
 }
 
 error realloc_file_buf( client_t* client, size_t predicted_size ){
     assert( client );
 
     char* helpful_buffer = NULL;
-    if( client->file_capacity < predicted_size ){
+    if( client->file_buf_cap < predicted_size ){
         helpful_buffer = (char*)realloc( client->file_buf, predicted_size );
         if( !helpful_buffer ){
             log_panic( "realloc returned null ptr" );
@@ -233,13 +115,14 @@ void read_file_ch( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf ){
 
     log_warning( "client closed file channel" );
     uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
-    if( uv_shutdown( shutdown_req, handle, shutdown_channel ) < 0 ){
-        log_panic( "shutdown return negative value" );
-        free( shutdown_req );
+    if( !uv_is_closing( (uv_handle_t*)handle )  ){
+	free( shutdown_req );
+	uv_close( (uv_handle_t*)handle, finish_cb );
+	return ;
     }
 }
 
-void parse_message( client_t* client, ssize_t nread, void (*on_cmd)( client_t* client, const char* string ) ){
+void parse_message( client_t* client, ssize_t nread, size_t (*on_cmd)( client_t* client, char* string ) ){
     assert( client );
 
     char* buf_start = client->file_buf;
@@ -249,247 +132,404 @@ void parse_message( client_t* client, ssize_t nread, void (*on_cmd)( client_t* c
     client->file_len += (size_t)nread;
     log_info( "string len: %lu", client->file_len );
 
-    if( buf_start[0] != '/' ){
-	send_file_part( client, buf_start  );
-	buf_start += nread;
-    }
-
-    while( ( newline_char = strchr( buf_start, '\n' ) )  && buf_start < client->file_buf + client->file_len ){
-        log_debug( "%c\n", buf_start[0] );                                                                               // '\n' --> '\0'
-        *newline_char = '\0';
-	if(  newline_char - buf_start >= MIN_COMMAND_SIZE ){
-            log_debug( "string from client: %s", buf_start );
-            on_cmd( client, buf_start );
+    size_t buffer_offset = 0;
+    while( client->file_len > 0 ){
+	if( buf_start[0] != '/' ){
+	    log_error( "error of parsing message. BUF_START[0] = %c", buf_start[0] );
+	    break;
+	}	
+	buffer_offset = parse_instruction( client, buf_start );
+	if( buffer_offset == 0 ){
+		log_warning( "buffer_offset = 0" );
+		break;
+	}
+	buf_start += buffer_offset;
+	
+	log_debug( "buffer_offset = %lu", buffer_offset );
+	log_info( "bytes left in the buffer: %lu", client->file_len - ( buf_start - client->file_buf ) );
+        if( buf_start < client->file_buf + client->file_len ){
+            memmove( client->file_buf, buf_start, client->file_len - ( buf_start - client->file_buf ) );
         }
-        buf_start = newline_char + 1;
+        client->file_len -= buf_start - client->file_buf;
+	buf_start = client->file_buf;
+        log_info( "string line after: %lu", client->file_len );
     }
-
-    log_info( "bytes left in the buffer: %lu", client->file_len - ( buf_start - client->file_buf ) );
-    if( buf_start < client->file_buf + client->file_len ){
-        memmove( client->file_buf, buf_start, client->file_len - ( buf_start - client->file_buf ) );
-    }
-    client->file_len -= buf_start - client->file_buf;
-    log_info( "string line after: %lu", client->file_len );
 }
 
-void parse_instruction( client_t* client, const char* string ){
+size_t parse_instruction( client_t* client, char* string ){
     assert( client );
     assert( string );
 
     log_debug( "string in parse_instruction: %s", string );
     if( string[0] == '\0' ){
-        return ;
+        return 0;
     }
 
     size_t command_index = 0;
-    error command_error = CORRECT;
+    size_t command_len = 0;
     for( ; command_index < commands_count; command_index++ ){
         const char* current_command = supported_commands[command_index].command_name;
         if( strncmp( string, current_command, strlen( current_command ) ) == 0 ){
-            command_error = supported_commands[command_index].cmd( client, string );
-            error_check( command_error,(void)0 );
-            return ;
+            command_len = supported_commands[command_index].cmd( client, string );
+	    log_debug( "command len = %lu", command_len );
+            return command_len;
         }
     }
     send_file_data( &client->file_handle, "Unknown command: %s\n", string );
+    return 0;
 }
 
-error send_file_part( client_t* client, const char* string ){
+size_t init_sender( client_t* client, char* string ){
     assert( client );
     assert( string );
+    // Pattern: /store <file-name> <file-size> <tags>
+    char* first_whitespace = strchr( string, ' ' );
+    char* second_whitespace = strchr( first_whitespace + 1, ' ' );
+    char* newline = strchr( second_whitespace + 1, '\n' );
+    *second_whitespace = '\0';
+    *newline = '\0';
 
-    file_transfer_t* current_transfer = find_transfer( &client->file_handle );
+    char* file_name = first_whitespace + 1;
+    char* string_file_cap = second_whitespace + 1;
+    time_t seconds = time( NULL );						// currect secodns since 1970
+    size_t hash_size = strlen( file_name ) + MAX_TIME_LEN + EXTRA_SPACE;
+    char* hash_line = (char*)calloc( hash_size, sizeof(char) );
+    snprintf( hash_line, hash_size, "%s_%ld", file_name, seconds );
 
-    uv_tcp_t** open_files_begining = current_transfer->open_files;
-    uv_tcp_t** current_open_file_ptr = open_files_begining;
-    uv_tcp_t* current_open_file = NULL;
-    size_t open_files_cap = current_transfer->open_files_cap;
+    unsigned long transfer_id = hash( hash_line );
+    client->file_capacity = strtoul( string_file_cap, NULL, AUTO_BASE );
+    client->transfer_id =transfer_id;
+    client->file_name = strdup( file_name );
 
-    log_info( "current files capacity = %lu", open_files_cap );
-    for(; current_open_file_ptr < open_files_begining + open_files_cap; current_open_file_ptr++ ){
-	current_open_file = *current_open_file_ptr;
-        if( current_open_file ){
-            send_file_data( current_open_file, "%s", string );
-	    *current_open_file_ptr = NULL;
-        }
-    }
-
-    return CORRECT;
+    send_file_data( &client->file_handle, "/sender_ID %lu\n", transfer_id ); 
+    free( hash_line );
+    
+    return newline - string + 1;
 }
 
-error init_recipient( client_t* client, const char* string ){
+size_t save_chunk( client_t* client, char* string ){
     assert( client );
     assert( string );
+    
+    chunk_info_t* chunk_info = (chunk_info_t*)calloc( ONE, sizeof(chunk_info_t) );
+    if( !chunk_info ){
+	log_error( "calloc return null ptr" );
+	return 0;
+    }
+    *chunk_info = read_chunk_line( client, string );
+    if( client->transfer_id != chunk_info->transfer_id ){
+	client->transfer_id = chunk_info->transfer_id;
+    }
+    client->chunk_info = chunk_info;
+    
+    size_t capacity = strlen( CHUNK_PATH ) + MAX_DIGITS;
+    char* load_path = (char*)calloc( capacity, sizeof(char) );
+    char* extension = strchr( client->file_name, '.' ) + 1;
+    size_t command_len = snprintf( load_path, capacity, "%s/%lu.%s", CHUNK_PATH, client->transfer_id, extension );
+    client->load_path = load_path;
 
-    const char* whitespace = strchr( string, ' ' );
-    unsigned long transfer_id = strtoul( whitespace + 1, NULL, DEC );
-
-    file_transfer_t* current_transfer = NULL;
-    add_recipient( &client->file_handle, transfer_id, &current_transfer );
-
-    send_file_data( &client->file_handle, "/file_name %s\n", current_transfer->file_name );
-    return CORRECT;
-}
-
-error add_recipient( uv_tcp_t* recipient_handle, unsigned long transfer_id, file_transfer_t** file_transfer ){
-    assert( recipient_handle );
-    assert( file_transfer );
-
-    file_transfer_t* current_transfer = find_id( transfer_id );
-    if( !current_transfer ){
-        log_error( "such a transfer does not exist" );
-        return FIND_TRANSFER_ERR;
+    uv_fs_t* req = (uv_fs_t*)calloc( ONE, sizeof(uv_fs_t) );
+    req->data = client;
+    int status = uv_fs_open( client->file_handle.loop, req, load_path, O_WRONLY | O_CREAT, FILE_MOD , fs_open_cb );
+    if( status < 0 ){
+        log_error( "file creation err" );
+        return 0;
     }
 
-    ssize_t free_index = find_free_elem( current_transfer );
-    free_index = realloc_recipients( current_transfer, free_index );
-    if( free_index == -1 ){
-        log_error( "can not realloc recipients" );
-        return MEMORY_REALLOC_ERR;
+    size_t inst_len = ( chunk_info->binary_start - string ) + chunk_info->size;
+   return inst_len;
+}
+
+void fs_open_cb( uv_fs_t* open_req ){
+    assert( open_req );
+
+    client_t* client = (client_t*)open_req->data;
+
+    if( open_req->result < 0 ){
+        log_error( "FROM SERVER: file open err = %s, load_path = '%s'", uv_strerror( (int)open_req->result ), client->load_path );
+        uv_fs_req_cleanup( open_req );
+        free( open_req );
+        return ;
     }
-
-    current_transfer->recipient_handles[free_index] = recipient_handle;
-    ++( current_transfer->recipients_count );
-    *file_transfer = current_transfer;
-    return CORRECT;
-}
-
-error init_sender( client_t* client, const char* string ){
-    assert( client );
-    assert( string );
-
-    const char* whitespace = strchr( string, ' ' );
-    unsigned long transfer_id = strtoul( whitespace + 1, NULL, DEC );
-
-    add_sender( &client->file_handle, transfer_id );
-    return CORRECT;
-}
-
-error add_sender( uv_tcp_t* sender_handle, unsigned long transfer_id ){
-    assert( sender_handle );
-
-    file_transfer_t* current_transfer = find_id( transfer_id );
-    if( !current_transfer ){
-        log_error( "such a transfer does not exist" );
-        return FIND_TRANSFER_ERR;
+    if( client->load_path ){
+	free( client->load_path );
+	client->load_path = NULL;
     }
-
-    current_transfer->sender_handle = sender_handle;
-    return CORRECT;
+    client->file_fd = open_req->result;
+    uv_fs_req_cleanup( open_req );
+    free( open_req );
+ 
+    // Pattern: /chunk <transfer-id> <offset> <size> <binary-chunk>
+    chunk_info_t chunk_info = *(client->chunk_info);
+    uv_fs_t* write_req = (uv_fs_t*)calloc( ONE, sizeof(uv_fs_t) );
+    write_req->data = client;
+    uv_buf_t write_buf = uv_buf_init( chunk_info.binary_start, chunk_info.size );
+    uv_fs_write( client->file_handle.loop, write_req, client->file_fd, &write_buf, BUFFERS_COUNT, chunk_info.offset, file_write_cb );
 }
 
-error send_agreement( client_t* client, const char* string  ){
-    assert( client  );
-    assert( string  );
+void file_write_cb( uv_fs_t* write_req ){
+    assert( write_req );
 
-    file_transfer_t* current_transfer = find_transfer( &client->file_handle );
-    if( !current_transfer ){
-	log_error( "such a transfer does not exist" );
-	return FIND_TRANSFER_ERR;
+    if( write_req->result < 0 ){
+	log_error( "error of writing data in srv file" );
+	uv_fs_req_cleanup( write_req );
+	free( write_req );
+	return ;
     }
     
-    error state = add_open_file( client, current_transfer );
-    if( state != CORRECT ){
-	log_error( "error adding client with open file" );
-	return state;
+    client_t* client = (client_t*)write_req->data;
+    chunk_info_t chunk_info = *(client->chunk_info);
+    send_file_data( &client->file_handle, "/ok %lu %lu\n", client->transfer_id, chunk_info.offset + chunk_info.size );
+    log_info( "IN SERVER: successfully saved %zd bytes out of %lu", write_req->result, client->file_capacity );
+
+    uv_fs_req_cleanup( write_req );
+    free( write_req );
+    uv_fs_t* close_req = (uv_fs_t*)calloc( ONE, sizeof(uv_fs_t) );
+    uv_fs_close( client->file_handle.loop, close_req, client->file_fd, file_close_cb );
+}
+
+void file_close_cb( uv_fs_t* close_req ){
+    assert( close_req );
+
+    if( close_req->result < 0 ){
+	log_error( "srv file close error" );
+    }
+
+    uv_fs_req_cleanup( close_req );
+    free( close_req );
+}
+
+chunk_info_t read_chunk_line( client_t* client, char* string ){
+    assert( client );
+    assert( string );
+
+    char* first_wh = strchr( string, ' ' );
+    char* second_wh = strchr( first_wh + 1, ' ' );
+    char* third_wh = strchr( second_wh + 1, ' ' );
+    char* fourth_wh = strchr( third_wh + 1, ' ' );
+
+    *second_wh = '\0';
+    *third_wh = '\0';
+    *fourth_wh = '\0';
+
+    unsigned long trasnfer_id = strtoul( first_wh + 1, NULL, DEC );
+    size_t offset = (unsigned long)strtoul( second_wh + 1, NULL, DEC );
+    size_t size = (unsigned long)strtoul( third_wh + 1, NULL, DEC );
+    char* binary_chunk = fourth_wh + 1;
+    chunk_info_t chunk_info = { binary_chunk, trasnfer_id, offset, size };
+
+    return chunk_info;
+}
+
+size_t init_recipient( client_t* client, char* string ){
+    assert( client );
+    assert( string );
+
+    char* first_wh = strchr( string, ' ' );
+    char* newline = strchr( first_wh + 1, '\n' );
+    *newline = '\0';
+    
+    client->transfer_id = strtoul( first_wh + 1, NULL, DEC );
+    char* file_name = get_file_name( client );
+    size_t path_cap = strlen( CHUNK_PATH ) + strlen( file_name ) + EXTRA_SPACE;
+    char* load_path = calloc( path_cap, sizeof(char) );
+    size_t path_len = snprintf( load_path, path_cap, "%s/%s", CHUNK_PATH, file_name );
+    client->load_path = load_path;
+
+    srv_file_size( client );
+
+    send_srv_chunk( client );
+
+    size_t command_len = newline - string + 1;
+    return command_len;
+}
+
+char* get_file_name( client_t* client ){
+    assert( client );
+
+    struct dirent* folder_part = NULL;
+    DIR* folder = opendir( CHUNK_PATH );
+
+    if( folder == NULL ){
+	log_error( "error of opening chunk folder" );
+	return NULL;
     }
     
-    send_file_data( current_transfer->sender_handle, "/recipient_accepted\n", string  );
-    ++( current_transfer->accepted_number );
-    check_download_responses( current_transfer );
-    log_debug( "client accepted the request to send data" );
-    return CORRECT;
-}
-
-error add_open_file( client_t* client, file_transfer_t* file_transfer ){
-    assert( client );
-    assert( file_transfer );
-
-    ssize_t free_index = find_free_place( file_transfer );
-    free_index = check_enough_memory( file_transfer, free_index );
-    if( free_index == -1 ){
-	log_error( "error add open file" );
-	return ADD_OPEN_FILE_ERR;
-    }
-
-    file_transfer->open_files[free_index] = &client->file_handle;
-    log_info( "added a client with an open file to the position %zd", free_index );
-    return CORRECT;
-}
-
-ssize_t find_free_place( file_transfer_t* file_transfer ){
-    assert( file_transfer );
-
-    uv_tcp_t** open_files = file_transfer->open_files;
-    size_t current_file_ind = 0;
-    size_t open_file_cap = file_transfer->open_files_cap;
-
-    for(; current_file_ind < open_file_cap; current_file_ind++ ){
-	if( open_files[current_file_ind] == NULL ){
-	    return current_file_ind;
+    char* file_name = NULL;
+    unsigned long transfer_id = 0;
+    while( (folder_part = readdir( folder ) ) != NULL ){
+	file_name = folder_part->d_name;
+	log_debug( "transfer file = '%s'", file_name );
+	transfer_id = strtoul( file_name, NULL, DEC );
+	if( transfer_id == client->transfer_id ){
+	    return file_name;
 	}
     }
-    
-    return -1;
+
+    log_error( "error finding transfer file" );
+    return NULL;
 }
 
-ssize_t check_enough_memory( file_transfer_t* file_transfer, ssize_t free_index ){
-    assert( file_transfer );
-    
-    if( free_index > -1 ){
-	return free_index;
-    }
-
-    size_t old_cap = file_transfer->open_files_cap;
-    file_transfer->open_files_cap *= 2;
-    size_t new_cap = file_transfer->open_files_cap;
-    uv_tcp_t** realloc_ptr= (uv_tcp_t**)realloc( file_transfer->open_files, new_cap * sizeof(uv_tcp_t*) );
-    if( !realloc_ptr ){
-	log_panic( "realloc return NULL PTR" );
-	return -1;
-    }
-    file_transfer->open_files = realloc_ptr;
-
-    size_t file_index = old_cap;
-    uv_tcp_t** open_files = file_transfer->open_files;
-    for(; file_index < new_cap; file_index++ ){
-	open_files[file_index] = NULL;
-    }
-
-    return old_cap;
-}
-
-error get_refusal( client_t* client, const char* string ){
+void srv_file_size( client_t* client ){
     assert( client );
-    assert( string );
-    
-    file_transfer_t* current_transfer = find_transfer( &client->file_handle );
-    if( !current_transfer ){
-	log_error( "such a transfer does not eist" );
-	return FIND_TRANSFER_ERR;
+
+    char* load_path = client->load_path;
+    struct stat file_data = {};
+    log_info( "sender path before stat: %s", load_path );
+    int status = stat( load_path, &file_data );
+    if( status == -1 ){
+        log_panic( "IN SERVER: stat returned negative value" );
+        return ;
     }
-    
-    ++( current_transfer->not_accepted_number );
-    check_download_responses( current_transfer );
-    log_debug( "cient not accepted the request to send data" );
-    return CORRECT;
+    log_debug( "fle size from stat = %lu", file_data.st_size );
+    client->file_capacity = file_data.st_size;
+    log_info( "file successfully opened" );
 }
 
-error check_download_responses( file_transfer_t* current_transfer ){
-    assert( current_transfer );
+void send_srv_chunk( client_t* client ){
+    assert( client );
     
-    size_t accepted_count = current_transfer->accepted_number;
-    size_t not_accepted_count = current_transfer->not_accepted_number;
-    size_t recipients_count = current_transfer->recipients_count;
-    log_debug( "accept = %lu, not accepted = %lu, recipients = %lu", accepted_count, not_accepted_count, recipients_count );
-    if( accepted_count + not_accepted_count == recipients_count ){
-	log_debug( "start shipping" );
-	send_file_data( current_transfer->sender_handle, "/shipping_info %lu %lu\n", accepted_count, recipients_count );
-	log_debug( "after send shipping");
-	return CORRECT;
+    if( client->file_capacity == 0 ){
+	log_info( "SERVER: finish sending file data" );
+	free( client->load_path );
+	client->load_path = NULL;
+	return ;
+    }
+    uv_fs_t* open_req = (uv_fs_t*)calloc( ONE, sizeof(uv_fs_t) );
+    open_req->data = client;
+    int status = uv_fs_open( client->file_handle.loop, open_req, client->load_path, O_RDONLY, FILE_MOD, srv_open_cb );
+}
+
+void srv_open_cb( uv_fs_t* open_req ){
+    assert( open_req );
+
+    if( open_req->result < 0 ){
+	log_error( "FROM SERVER: file open err = %s", uv_strerror( (int )open_req->result ) );
+	uv_fs_req_cleanup( open_req );
+	free( open_req );
+	return ;
+    }
+    
+    client_t* client = (client_t*)open_req->data;
+    client->file_fd = open_req->result;
+    uv_fs_req_cleanup( open_req );
+    free( open_req );
+
+    client->srv_file_data = (char*)calloc( PART_SIZE, sizeof(char) );
+    uv_fs_t* read_req = (uv_fs_t*)calloc( ONE, sizeof(uv_fs_t) );
+    read_req->data = client;
+    uv_buf_t read_buf = uv_buf_init( client->srv_file_data, PART_SIZE );
+    uv_fs_read( client->file_handle.loop, read_req, client->file_fd, &read_buf, ONE, client->offset, srv_read_cb );
+}
+
+void srv_read_cb( uv_fs_t* read_req ){
+    assert( read_req );
+
+    client_t* client = (client_t*)read_req->data;
+    if( read_req->result < 0 ){
+	log_error( "uv_fs_read return negative value in callback" );
+	free( read_req );
+	free( client->srv_file_data );
+	return ;
+    }
+    free( read_req );
+
+    size_t snprintf_len = strlen( "/chunk" ) + MAX_DIGITS;
+    char* snprintf_line = (char*)calloc( MAX_DIGITS, sizeof(char)  );
+    char* binary_chunk = client->srv_file_data;
+    size_t size = PART_SIZE <= client->file_capacity
+	                   ? PART_SIZE
+			   : client->file_capacity;
+
+    // /chunk <transfer_id> <offset> <size>
+    size_t command_size = snprintf( snprintf_line, snprintf_len, "/chunk %lu %lu %lu ",
+		                   client->transfer_id, client->offset, size );
+
+    uv_buf_t bufs[2] = {};
+    bufs[0] = uv_buf_init( snprintf_line, command_size );
+    bufs[1] = uv_buf_init( binary_chunk, size );
+
+    uv_write_t* req = calloc( ONE, sizeof(uv_write_t) );
+    if( !req ){
+	log_error( "calloc return null ptr" );
+	return ;
+    }
+    client->chunk_line = snprintf_line;
+    req->data = client;
+    uv_write( req, &client->file_handle, bufs, TWO, srv_write_cb );
+    client->file_capacity -= size;
+    client->offset += size;
+    check_file_end( client );
+} 
+
+void check_file_end( client_t* client ){
+    assert( client );
+
+    if( client->file_capacity == 0 ){
+	send_file_data( &client->file_handle, "/close %lu\n", client->transfer_id );
+    }
+}
+
+void srv_write_cb( uv_write_t* write_req, int status ){
+   assert( write_req );
+
+    if( status < 0 ){
+	log_error( "error sending file" );
+	free( write_req );
+	free( write_req->data );
+	return ;
     }
 
-    return NOT_ENOUGH_ANSWERS;
+   client_t* client = (client_t*)write_req->data;
+   if( client->chunk_line ){
+	free( client->chunk_line );
+	client->chunk_line = NULL;
+   }
+   if( client->srv_file_data ){
+	free( client->srv_file_data );
+	client->srv_file_data = NULL;
+   }
+    
+   free( write_req );
+   uv_fs_t* close_req = (uv_fs_t*)calloc( ONE, sizeof(uv_fs_t) );
+   uv_fs_close( client->file_handle.loop, close_req, client->file_fd, srv_file_close );
+}
+
+void srv_file_close( uv_fs_t* close_req ){
+    assert( close_req );
+   
+    if( close_req->result < 0 ){
+	log_error( "nwegative result in close callbacl" );
+    }
+
+    uv_fs_req_cleanup( close_req );
+    free( close_req );
+}
+
+size_t send_chunk( client_t* client, char* string ){
+   assert( client );
+   assert( string );
+
+    char* first_wh = strchr( string, ' ' );
+    char* second_wh = strchr( first_wh + 1, ' ' );
+    char* newline = strchr( second_wh + 1, '\n' );
+    *second_wh = '\0';
+    *newline = '\0';
+
+    unsigned long transfer_id = strtoul( first_wh + 1, NULL, DEC );
+    size_t current_offset = strtoul( second_wh + 1, NULL, DEC );
+
+    if( transfer_id != client->transfer_id ){
+	log_panic( "IN SERVER: server id != id from client. Server = %lu, tranfer = %lu.", client->transfer_id, transfer_id );
+	return 0;
+    }
+    if( current_offset != client->offset ){
+	log_panic( "IN SERVER: server offset != offset from client. Server offset = %lu, offset = %lu", client->offset, current_offset );
+	return 0;
+    }
+
+    send_srv_chunk( client );
+    return newline - string + 1;
 }
 
 void shutdown_channel( uv_shutdown_t* shutdown_req, int status ){
@@ -501,160 +541,6 @@ void shutdown_channel( uv_shutdown_t* shutdown_req, int status ){
     free( shutdown_req );
 }
 
-error destroy_channel( client_t* client, const char* instruction ){
-    assert( client );
-    assert( instruction );
-
-    file_transfer_t* file_transfer = find_transfer( &client->file_handle );
-    destroy_transfer( &file_transfer );
-
-    return CORRECT;
-}
-
-void destroy_transfer( file_transfer_t** file_transfer_ptr ){
-    
-    file_transfer_t* file_transfer = *file_transfer_ptr;
-    if( file_transfer == NULL ){
-	log_warning( "in destroy transfer: file transfer NULL PTR" );
-	return ;
-    }
-    
-    close_sockets( file_transfer );
-
-    file_transfer->recipients_count = 0;
-    file_transfer->not_accepted_number = 0;
-    file_transfer->accepted_number = 0;
-    file_transfer->file_name = 0;
-    file_transfer->transfer_id = 0;
-    file_transfer->recipients_capacity = 0;
-    free( file_transfer->recipient_handles );
-    file_transfer->open_files_cap = 0;
-    free( file_transfer->open_files );
-    *file_transfer_ptr = NULL;
-}
-
-void close_sockets( file_transfer_t* file_transfer ){
-    assert( file_transfer );
-
-    uv_tcp_t** recipients_begining = file_transfer->recipient_handles;
-    uv_tcp_t** current_recipient = recipients_begining;
-    size_t recipeints_cap = file_transfer->recipients_capacity;
-    for(; current_recipient < recipients_begining + recipeints_cap; current_recipient++ ){
-	if( *current_recipient && !uv_is_closing( (uv_handle_t*)(*current_recipient ) ) ){
-	    uv_close( (uv_handle_t*)(*current_recipient ), finish_cb );
-	}
-    }
-
-    uv_tcp_t* sender_handle = file_transfer->sender_handle;
-    if( sender_handle && !uv_is_closing( (uv_handle_t* )sender_handle ) ){
-	uv_close( (uv_handle_t* )sender_handle, finish_cb );
-    }
-}
-
-void delete_client( client_t* client ){
-    assert( client );
-
-    uv_tcp_t* file_handle = &client->file_handle;
-    file_transfer_t* current_transfer = find_transfer( file_handle );
-    if( !current_transfer ){
-        free( client );
-        log_error( "such a transfer does not exist" );
-        return ;
-    }
-    if( file_handle == current_transfer->sender_handle ){
-        current_transfer->sender_handle = NULL;
-        log_info( "sender was deleted" );
-        free( client );
-        return ;
-    }
-
-    uv_tcp_t** recipients_begining = current_transfer->recipient_handles;
-    uv_tcp_t** current_recipient = recipients_begining;
-    size_t recipients_capacity = current_transfer->recipients_capacity;
-
-    for(; current_recipient < recipients_begining + recipients_capacity; current_recipient++ ){
-        if( *current_recipient == file_handle ){
-            *current_recipient = NULL;
-	    --( current_transfer->recipients_count );
-            log_info( "recipient was deleted" );
-            free( client );
-            return ;
-        }
-    }
-}
-
-file_transfer_t* find_transfer( uv_tcp_t* client_handle ){
-    assert( client_handle );
-
-    file_transfer_t** transfer_begining = transfer_array;
-    file_transfer_t** current_transfer_ptr = transfer_begining;
-    file_transfer_t* current_transfer = NULL;
-    file_transfer_t* returned_value = NULL;
-
-    for(; current_transfer_ptr < transfer_begining + transfer_array_cap; current_transfer_ptr++ ){
-        current_transfer = *current_transfer_ptr;
-        if( current_transfer == NULL ){
-            continue;
-        }
-        if(  client_handle == current_transfer->sender_handle ){
-	    log_debug( "sender is founded" );
-            return current_transfer;
-        }
-        if( returned_value = find_recipient( current_transfer, client_handle) ){
-	    log_debug( "recipient is founded" );
-            return returned_value;
-        }
-    }
-    return NULL;
-}
-
-file_transfer_t* find_recipient( file_transfer_t* current_transfer, uv_tcp_t* client_handle ){
-    assert( current_transfer );
-    assert( client_handle );
-
-    if( client_handle == current_transfer->sender_handle ){
-        return current_transfer;
-    }
-
-    uv_tcp_t** recipients_begining = current_transfer->recipient_handles;
-    uv_tcp_t** current_recipient = recipients_begining;
-    size_t recipients_capacity = current_transfer->recipients_capacity;
-
-    for(; current_recipient < recipients_begining + recipients_capacity; current_recipient++ ){
-        if( *current_recipient == client_handle ){
-            return current_transfer;
-        }
-    }
-    return NULL;
-}
-
-file_transfer_t* find_id( unsigned long transfer_id ){
-
-    file_transfer_t** transfer_begining = transfer_array;
-    file_transfer_t** current_transfer = transfer_begining;
-
-    for(; current_transfer < transfer_begining + transfer_array_cap; current_transfer++ ){
-        if( *current_transfer && (*current_transfer)->transfer_id == transfer_id ){
-            return *current_transfer;
-        }
-    }
-    return NULL;
-}
-
-ssize_t find_free_elem( file_transfer_t* current_transfer ){
-    assert( current_transfer );
-
-    uv_tcp_t** recipients = current_transfer->recipient_handles;
-    size_t recipients_count = current_transfer->recipients_capacity;
-    size_t recip_index = 0;
-
-    for(; recip_index < recipients_count; recip_index++ ){
-        if( recipients[recip_index] == NULL ){
-            return recip_index;
-        }
-    }
-    return -1;
-}
 
 void send_file_data( uv_tcp_t* file_handle, const char* format, ... ){
     assert( file_handle );
@@ -675,7 +561,7 @@ void send_file_data( uv_tcp_t* file_handle, const char* format, ... ){
         free( buffer.base );
         free( req );
     }
-    log_debug( "succesfully send = '%s'", buffer.base );
+    log_debug( "succesfully send = '%lu'", buffer.len );
 }
 
 void record_cb( uv_write_t* write_req, int status ){
@@ -708,6 +594,14 @@ void finish_cb( uv_handle_t* handle ){
         free( client->file_buf );
 	client->file_buf = NULL;
     }
+    if( client->file_name ){
+	free( client->file_name );
+	client->file_name = NULL;
+    }
+    if( client->load_path ){
+	free( client->load_path );
+	client->load_path = NULL;
+    }
 
-    delete_client( client );
+    free( client );
 }

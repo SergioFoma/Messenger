@@ -207,7 +207,7 @@ void waiting_download_win( windows_t* windows );
 
 void download_complete( windows_t* windows );
 
-void dispatch_notification( WINDOW* file_win, unsigned long accepted, unsigned long all );
+void dispatch_notification( WINDOW* file_win );
 
 void update_chat_windows( windows_t* windows );
 

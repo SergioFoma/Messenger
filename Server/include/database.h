@@ -59,8 +59,6 @@ typedef struct entry_s {
     int day;
 } entry_t;
 
-unsigned long hash( const char* string );
-
 database_err_t make_dir();
 
 database_err_t delete_dir();

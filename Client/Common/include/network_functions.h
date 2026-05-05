@@ -27,12 +27,16 @@ typedef enum app_state_e {
     WAIT_DISPATCH_COMPLET	=   19,
     READ_BOT_PATH		=   20,
     SEND_BOT_PATH		=   21,
-    BOT_RESPONSE		=   22
+    BOT_RESPONSE		=   22,
+    CONNECT_SENDER		=   23
 } app_state_t;
 
 typedef enum client_err_t {
     NO_ERR          =       0,
-    MEMORY_ERR      =       1
+    MEMORY_ERR      =       1,
+    UV_OPEN_ERR     =	    2,
+    STAT_ERR	    =       3,
+    NORMAL_WORK     =       4
 } client_err_t;
 
 typedef enum client_type_s {
@@ -41,6 +45,13 @@ typedef enum client_type_s {
     UNDEFINED_TYPE	=   2
 } client_type_t;
 
+typedef struct chunk_data_s {
+    char* binary_start;
+    unsigned long transfer_id;
+    size_t offset;
+    size_t size;
+} chunk_data_t;
+
 typedef struct client_info_s {
     uv_tcp_t* handle;
     uv_tcp_t* file_handle;
@@ -48,10 +59,13 @@ typedef struct client_info_s {
     char* file_name;                // name of the received/sent file
     char* sender_path;              // name and path, that entered sender
     char* receiver_path;            // name and path, that entered receiver
-    int file_fd;                    // file descriptor on file that is being downloaded/sent
+    char* full_path;		    // for receiver
     char* srv_buf;                  // buffer for data from server
     char* scr_buf;                  // buffer for data from screen
     char* file_buf;                 // buffer for file data
+    char* command_line;		    // /chunk <transfer_id> <offset> <size>
+    char* file_data;
+    chunk_data_t* chunk_data;
     unsigned long transfer_id;      // to send and receive files
     size_t srv_buf_cap;
     size_t srv_buf_len;
@@ -60,8 +74,10 @@ typedef struct client_info_s {
     size_t file_buf_len;
     size_t file_buf_cap;
     size_t write_bytes;		    // for receiver
-    size_t sent_bytes;              // for sender
+    size_t offset;                  // for sender
     size_t file_capacity;           // for sender
+    int file_fd;                    // file descriptor on file that is being downloaded/sent
+    int active_writes;
     app_state_t app_state;          // what awaits the application now
     client_type_t client_type;      // for joined callback
     bool is_stopped;
@@ -73,9 +89,6 @@ typedef struct main_connection_s {
     client_t* client;
 } main_connection_t;
 
-typedef struct srv_command_s {
-    char* command_name;
-    void (*func)( client_t* client, char* command_line );
-} srv_command_t;
+
 
 #endif

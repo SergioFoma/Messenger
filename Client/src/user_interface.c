@@ -308,7 +308,7 @@ ui_stat_t parse_request( WINDOW* window, user_info_t* user_data, const bool is_c
         case KEY_F(9):
             return START_SEND_FILE;
 	case KEY_F(10):
-	    return START_RECOGNIZE_PHOTO; 
+	    return START_RECOGNIZE_PHOTO;
         case KEY_F(12):
             return leave_app( user_data );
         default:
@@ -739,7 +739,7 @@ ui_stat_t create_list_win( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
 
-    int nlines = 40, ncolumns = 60;
+    int nlines = 42, ncolumns = 60;
     int begin_x = console_size->ws_col / 3 + 15, begin_y = console_size->ws_row / 5;
     int der_nlines = nlines - 2, der_ncolumns = ncolumns - 2;
     int der_begin_x = 1, der_begin_y = 1;
@@ -927,8 +927,10 @@ void delete_symbol( size_t* buf_size, WINDOW* window ){
 }
 
 void show_companion_message( windows_t* windows, char* companion_message, size_t str_len ){
-    assert( companion_message );
     assert( windows );
+    if( !companion_message ){
+	return ;
+    }
 
     int user_x = -1;
     int user_y = -1;
@@ -1030,13 +1032,13 @@ void download_complete( windows_t* windows ){
     wrefresh( windows->der_file_win );
 }
 
-void dispatch_notification( WINDOW* file_win, unsigned long accepted, unsigned long all ){
+void dispatch_notification( WINDOW* file_win ){
     assert( file_win );
 
     clear_file_line( file_win );
     int file_x = 0;
     int file_y = input_line_pos.file_y;
-    mvwprintw( file_win, file_y, file_x, "%lu OUT OF %lu USERS RECIEVED FILE, REST REFUSED\n", accepted, all );
+    mvwprintw( file_win, file_y, file_x, "FILE HAS BEEN SENT SUCCESSFULLY\n");
     show_list_option( file_win, "CLOSE NOTOFOCATION WINDOW: ", "C", file_y + 1 );
 
     wrefresh( file_win );

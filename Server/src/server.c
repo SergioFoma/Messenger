@@ -47,7 +47,6 @@ int main( int argc, char** argv ){
     error_check( init_error, 0 );
     uv_run( loop, UV_RUN_DEFAULT );
     destroy_rooms();
-    destroy_transfers();
     return 0;
 }
 

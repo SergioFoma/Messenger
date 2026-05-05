@@ -6,6 +6,11 @@
 #include "network_functions.h"
 #include "user_interface.h"
 
+typedef struct srv_command_s {
+    char* command_name;
+    void (*func)( client_t* client, char* command_line );
+} srv_command_t;
+
 user_info_t* start_registration();
 
 void get_background();
@@ -64,9 +69,9 @@ bool find_srv_command( client_t* client, char* server_message );
 
 void connect_recipient( client_t* client, char* command_line );
 
-void connect_sender( client_t* client, char* command_lie );
+void connect_sender( client_t* client );
 
-void connecting_file_channel( client_t* client, char* command_line, client_type_t client_type );
+void connecting_file_channel( client_t* client );
 
 void send_message( client_t* client );
 
@@ -85,6 +90,8 @@ void view_unread_message( client_t* client );
 void send_file_name( client_t* client );
 
 char* get_file_name( char* path );
+
+void create_receiver_file( client_t* client );
 
 void clean_scr_buf( client_t* client );
 

@@ -20,8 +20,7 @@ static const int DEC = 10;
 static const size_t INIT_BUF_LEN = 10;
 
 srv_command_t srv_commands[] = {
-    { "/recipients_ID"      ,       connect_recipient       },
-    { "/sender_ID"          ,       connect_sender          },
+    { "/recipients_ID"      ,       connect_recipient       }
 };
 size_t command_count = sizeof(srv_commands) / sizeof(srv_command_t);
 
@@ -93,8 +92,12 @@ void client_init( client_t* client ){
     client->is_stopped = false;
     client->stopped_file_ch = false;
     client->write_bytes = 0;
-    client->sent_bytes = 0;
+    client->offset = 0;
     client->file_capacity = 0;
+    client->file_data = NULL;
+    client->full_path = NULL;
+    client->chunk_data = NULL;
+    client->active_writes = 0;;
     // init server buf
     client->srv_buf = NULL;
     client->srv_buf_len = 0;
@@ -209,7 +212,7 @@ void poll_cb( uv_poll_t* handle, int status, int events ){
             check_ui_state( handle, state, client );
             break;
         case READ_PATH:
-            read_name( client, SEND_PATH, file_path );
+            read_name( client, CONNECT_SENDER, file_path );
             check_app_state( handle, client );
             break;
         case WAITING_ID:
@@ -231,7 +234,6 @@ void poll_cb( uv_poll_t* handle, int status, int events ){
 	case WAIT_DISPATCH_COMPLET:
 	    state = file_request( windows->der_file_win );
 	    check_ui_state( handle, state, client );
-	    destroy_file_ch( client );
 	    break;
 	case READ_BOT_PATH:
 	    read_name( client, SEND_BOT_PATH, file_path );
@@ -281,7 +283,7 @@ void check_ui_state( uv_poll_t* handle, ui_stat_t state, client_t* client ){
             break;
         case START_ROOM_LIST:
             room_list( client );
-            break;	
+            break;
         case CLOSE_ROOM_LIST:
             close_room_info( windows );
 	    clear_input_line( windows->der_companion_win, COMPANION_ENTERS );
@@ -312,7 +314,7 @@ void check_ui_state( uv_poll_t* handle, ui_stat_t state, client_t* client ){
             break;
         case REQUEST_NOT_ACCEPTED:
             close_file_windows( windows );
-            request_not_accepted( client );
+            //request_not_accepted( client );
 	    client->app_state = USER_ACTION;
             break;
 	case FINISH_DOWNLOAD:
@@ -352,16 +354,15 @@ void check_app_state( uv_poll_t* handle, client_t* client ){
         case SEND_MESSAGE:
             send_message( client );
             break;
+	case CONNECT_SENDER:
+	    connect_sender( client );
+	    break;
         case SEND_PATH:
             send_path( client );
             break;
-        case CREATE_FILE:					
-	    close_file_windows( windows );
-	    create_get_file_win( console_size, windows );
-            create_file( client );
-            clean_scr_buf( client );
-	    client->app_state = COMPLETE_DOWNLOAD;
-            break;
+        case CREATE_FILE:
+	    create_receiver_file( client );
+	    break;
 	case SEND_BOT_PATH:
 	    send_bot_path(client);
 	    break;
@@ -460,10 +461,10 @@ void send_path( client_t* client ){
 
 void send_bot_path( client_t* client ){
     assert( client  );
-    
+
     log_info( "path of bot file = '%s'", client->scr_buf );
     server_send( client, "/bot_file %s\n", client->scr_buf );
-    
+
     clean_scr_buf( client );
     clear_file_line( windows->der_file_win );
     client->app_state = BOT_RESPONSE;
@@ -661,30 +662,57 @@ bool find_srv_command( client_t* client, char* server_message ){
 void connect_recipient( client_t* client, char* command_line ){
     assert( client );
     assert( command_line );
+    
+    char* first_wh = strchr( command_line, ' ' );
+    char* second_wh = strchr( first_wh + 1, ' ' );
+    *second_wh = '\0';
+    client->transfer_id = strtoul( first_wh + 1, NULL, DEC );
+    char* file_name = strdup( second_wh + 1 );
+    client->file_name = file_name;
 
-    connecting_file_channel( client, command_line, RECEIVER );
+    client->app_state = FILE_REQUEST;
+    client->client_type = RECEIVER;
+
+    create_get_file_win( console_size, windows );
+    file_accept_request( windows->der_file_win, file_name );
+}
+
+void connect_sender( client_t* client ){
+    assert( client );
+
+    client->sender_path = strdup( client->scr_buf );                  // save file path: home/documents/main.txt
+    char* file_name = get_file_name( client->scr_buf );		      // find file name: main.txt
+    client->file_name = strdup( file_name );                          // save file name
+    client->client_type = SENDER;				      // SENDER or RECEIVER
+
+    log_info( "file path: '%s'", client->sender_path );
+
+    clean_scr_buf( client );
+    clear_file_line( windows->der_file_win );
+
+    connecting_file_channel( client );
     client->app_state = FILE_REQUEST;
 }
 
-void connect_sender( client_t* client, char* command_line ){
+void connecting_file_channel( client_t* client ){
     assert( client );
-    assert( command_line );
-
-    connecting_file_channel( client, command_line, SENDER );
-
-    client->app_state = WAIT_DISPATCH_COMPLET;
-}
-
-void connecting_file_channel( client_t* client, char* command_line, client_type_t client_type ){
-    assert( client );
-    assert( command_line );
-
-    char* whitespace = strchr( command_line, ' ' );
-    unsigned long transfer_id = strtoul( whitespace + 1, NULL, DEC );
 
     main_struct_t main_struct = { windows, console_size, user_data };
     main_connection_t main_connection = { client->handle->loop, client };
-    open_new_connection( &main_struct, &main_connection, transfer_id, client_type );
+    open_new_connection( &main_struct, &main_connection );
+}
+
+void create_receiver_file( client_t* client ){
+    assert( client );
+
+    client->receiver_path = strdup( client->scr_buf );
+
+    close_file_windows( windows );
+    create_get_file_win( console_size, windows );
+    waiting_download_win( windows );
+    clean_scr_buf( client );
+    connecting_file_channel( client );
+    client->app_state = COMPLETE_DOWNLOAD;
 }
 
 void clean_scr_buf( client_t* client ){
@@ -696,9 +724,11 @@ void clean_scr_buf( client_t* client ){
 
 void clean_srv_buf( client_t* client ){
     assert( client );
-
-    memset( client->srv_buf, '\0', client->srv_buf_len );
-    client->srv_buf_len = 0;
+    
+    if( client->srv_buf ){
+	memset( client->srv_buf, '\0', client->srv_buf_len );
+        client->srv_buf_len = 0;
+    }
 }
 
 void write_cb( uv_write_t* req, int status ){
@@ -775,6 +805,14 @@ void destroy_client( client_t* client ){
     if( client->sender_path ){
 	free( client->sender_path );
 	client->sender_path = NULL;
+    }
+    if( client->receiver_path ){
+	free( client->receiver_path );
+	client->receiver_path = NULL;
+    }
+    if( client->file_name ){
+	free( client->file_name );
+	client->file_name = NULL;
     }
     if( client ){
         free( client );

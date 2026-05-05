@@ -12,6 +12,7 @@
 #include "database.h"
 #include "logging.h"
 #include "string_function.h"
+#include "server_functions.h"
 
 const char* FOLDER_NAME = "../Database";
 mode_t DIR_MODE = 0777;                             // for mkdir
@@ -33,17 +34,6 @@ const time_t ONE_YEAR       =   604800 * 4 * 12;
 const int TODAY     = 1;                            // messages written on the same day must have a difference in the number of days - 0
 const int YESTERDAY = 2;                            // a message written yesterday should have a difference of 1 day
 const int WEEK      = 1;                            // a message written this week must have a difference in days no more than 6
-
-unsigned long hash( const char* string ){
-    assert( string );
-
-    unsigned long hash = 5381;
-    int c;
-    while( ( c = *string++ ) ){
-        hash = ( (hash << 5 ) + hash ) + c;
-    }
-    return hash;
-}
 
 database_err_t make_dir(){
 

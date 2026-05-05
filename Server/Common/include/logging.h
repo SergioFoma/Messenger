@@ -1,7 +1,6 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-#include <stdio.h>
 #include <stdbool.h>
 
 typedef enum code_error_e {
@@ -16,7 +15,8 @@ typedef enum code_error_e {
     FIND_TRANSFER_ERR               = 8,
     NOT_ENOUGH_ANSWERS		    = 9,
     ADD_OPEN_FILE_ERR		    = 10,
-    BOT_REG_ERR			    = 11
+    BOT_REG_ERR			    = 11,
+    OPEN_FILE_ERR		    = 12
 } error;
 
 #define DEFAULT         "\033["

@@ -8,7 +8,9 @@ typedef enum code_error_e {
     CORRECT                         = 0,
     MEMORY_ALLOC_ERR                = 1,
     NULL_PTR                        = 2,
-    SEARCH_ERROR                    = 3
+    SEARCH_ERROR                    = 3,
+    ID_ERROR			    = 4,
+    OFFSET_ERROR		    = 5
 } error;
 
 #define DEFAULT         "\033["
