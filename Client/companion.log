@@ -1,16 +1,32 @@
 [INFO] File: src/logger.c , function: open_log_file , line 13, message: success open log file
-[INFO] File: src/user_interface.c , function: get_console_size , line 50, message: default console size: nlines = 63, ncolumns = 254
-[INFO] File: src/callbacks.c , function: start_registration , line 38, message: IP: 192.168.1.105
-[INFO] File: src/client.c , function: main , line 42, message: loop start ... 
+[INFO] File: src/user_interface.c , function: get_console_size , line 50, message: default console size: nlines = 59, ncolumns = 248
+[INFO] File: src/callbacks.c , function: start_registration , line 38, message: IP: 10.55.131.69
+[INFO] File: src/client.c , function: main , line 51, message: loop start ... 
 [INFO] File: src/callbacks.c , function: connect_cb , line 85, message: read start
-[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: test
-[DEBUG] File: src/user_interface.c , function: add_chat , line 397, message: added room: test
-[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 230, message: current name = 'test', room name = 'test'
+[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: TESTIC
+[DEBUG] File: src/user_interface.c , function: add_chat , line 410, message: added room: TESTIC
+[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 230, message: current name = 'TESTIC', room name = 'TESTIC'
 [INFO] File: src/user_interface.c , function: check_connect_possibility , line 232, message: room was found
-[INFO] File: src/callbacks.c , function: join_room , line 383, message: client join room: test
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 555, message: test
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 561, message: TEST
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = '/recipients_ID 4423135111973161284 prog.c
+[INFO] File: src/callbacks.c , function: join_room , line 383, message: client join room: TESTIC
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 577, message: TESTIC
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 583, message: TESTIC
+[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = 'Hello!
 '
-[DEBUG] File: src/user_interface.c , function: file_request , line 334, message: user choice = N
-[INFO] File: src/callbacks.c , function: check_ui_state , line 260, message: user close messenger
+[WARNING] File: src/callbacks.c , function: find_srv_command , line 658, message: command was not found
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 72
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 121
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 33
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 10
+[INFO] File: src/callbacks.c , function: send_message , line 491, message: client send message: Hy!
+[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+'
+[WARNING] File: src/callbacks.c , function: find_srv_command , line 658, message: command was not found
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 104
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 111
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 119
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 63
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 10
+[INFO] File: src/callbacks.c , function: send_message , line 491, message: client send message: how?
+[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = 'i don't now
+'
+[WARNING] File: src/callbacks.c , function: find_srv_command , line 658, message: command was not found

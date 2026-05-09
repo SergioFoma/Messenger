@@ -1,9 +1,8 @@
 #ifndef SERVER_FUNCTIONS_H
 #define SERVER_FUNCTIONS_H
 
+#include <stdbool.h>
 #include <uv.h>
-
-#include "logging.h"
 
 typedef struct chunk_info_s {
     char* binary_start;

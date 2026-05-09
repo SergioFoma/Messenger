@@ -307,7 +307,7 @@ void fs_read_cb( uv_fs_t* read_req ){
     bufs[0] = uv_buf_init( snprintf_line, command_size );
     bufs[1] = uv_buf_init( binary_chunk, size );
 
-    uv_write_t* req = calloc( ONE, sizeof(uv_write_t) );
+    uv_write_t* req = (uv_write_t*)calloc( ONE, sizeof(uv_write_t) );
     if( !req ){
 	log_error( "calloc return null ptr" );
 	return ;
@@ -577,7 +577,7 @@ size_t finish_downloading( client_t* client, char* command ){
 void send_file_data( uv_tcp_t* handle, const char* format, ... ){
     assert( format );
 
-    if( !handle || uv_is_closing( (uv_stream_t*)handle ) ){
+    if( !handle || uv_is_closing( (uv_handle_t*)handle ) ){
 	log_warning( "socket was closed, can't write message" );
 	return ;
     }

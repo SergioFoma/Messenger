@@ -7,7 +7,6 @@
 #include "chat_commands.h"
 #include "logging.h"
 #include "database.h"
-#include "file_commands.h"
 #include "server_functions.h"
 
 static const size_t ONE = 1;                                                               //for calloc

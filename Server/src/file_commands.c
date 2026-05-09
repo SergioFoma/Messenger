@@ -7,7 +7,6 @@
 #include <dirent.h>
 
 #include "file_commands.h"
-#include "chat_commands.h"
 #include "logging.h"
 
 static const size_t ONE = 1;

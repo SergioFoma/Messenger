@@ -1,63 +1,409 @@
 [INFO] File: src/logger.c , function: open_log_file , line 13, message: success open log file
 [INFO] File: src/user_interface.c , function: get_console_size , line 50, message: default console size: nlines = 59, ncolumns = 248
-[INFO] File: src/callbacks.c , function: start_registration , line 38, message: IP: 192.168.1.219
-[INFO] File: src/client.c , function: main , line 42, message: loop start ... 
+[INFO] File: src/callbacks.c , function: start_registration , line 38, message: IP: 192.168.1.105
+[INFO] File: src/client.c , function: main , line 51, message: loop start ... 
 [INFO] File: src/callbacks.c , function: connect_cb , line 85, message: read start
-[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: room
-[DEBUG] File: src/user_interface.c , function: add_chat , line 397, message: added room: room
-[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 230, message: current name = 'room', room name = 'room'
+[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: hello
+[DEBUG] File: src/user_interface.c , function: add_chat , line 410, message: added room: hello
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 3
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 2
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 1
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 4
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 3
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 2
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 1
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: good
+[DEBUG] File: src/user_interface.c , function: add_chat , line 410, message: added room: good
+[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 230, message: current name = 'hello', room name = 'hello'
 [INFO] File: src/user_interface.c , function: check_connect_possibility , line 232, message: room was found
-[INFO] File: src/callbacks.c , function: join_room , line 383, message: client join room: room
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 555, message: room
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 561, message: ROOM
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = '/recipients_ID 8168105391214742685 ava.jpeg
-'
-[DEBUG] File: src/user_interface.c , function: file_request , line 334, message: user choice = N
-nd was not found
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 618, message: start waiting exit
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 622, message: finish waiting exit
-[DEBUG] File: src/user_interface.c , function: waiting_exit , line 988, message: key in room info window: 259
-[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
-[INFO] File: src/user_interface.c , function: delete_symbol , line 925, message: delete one symbol
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 480, message: get file name: home/foma/ava.jpeg
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 480, message: get file name: foma/ava.jpeg
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 480, message: get file name: ava.jpeg
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 483, message: file name from path: ava.jpeg
-[INFO] File: src/callbacks.c , function: connect_sender , line 688, message: file path: '/home/foma/ava.jpeg'
-[INFO] File: src/sending_files.c , function: open_new_connection , line 72, message: successfully connected to file chanel
-[INFO] File: src/sending_files.c , function: get_file_size , line 328, message: sender path before stat: /home/foma/ava.jpeg
-[DEBUG] File: src/sending_files.c , function: get_file_size , line 334, message: fle size from stat = 24309
-[INFO] File: src/sending_files.c , function: get_file_size , line 336, message: file successfully opened
-[DEBUG] File: src/sending_files.c , function: send_file_information , line 107, message: client file name = 'ava.jpeg', client file cap = 24309
-[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 31
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /sender_ID 8168105391214742685
-
-[DEBUG] File: src/sending_files.c , function: parse_command , line 222, message: command '/sender_ID' was founded
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 195, message: buffer_offset = 31
-[INFO] File: src/sending_files.c , function: parse_file_data , line 196, message: bytes left in the buffer: 0
-[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
-[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 29
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /ok 8168105391214742685 8192
-
-[DEBUG] File: src/sending_files.c , function: parse_command , line 222, message: command '/ok' was founded
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 195, message: buffer_offset = 29
-[INFO] File: src/sending_files.c , function: parse_file_data , line 196, message: bytes left in the buffer: 0
-[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
-[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 30
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /ok 8168105391214742685 16384
-
-[DEBUG] File: src/sending_files.c , function: parse_command , line 222, message: command '/ok' was founded
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 195, message: buffer_offset = 30
-[INFO] File: src/sending_files.c , function: parse_file_data , line 196, message: bytes left in the buffer: 0
-[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
-[DEBUG] File: src/sending_files.c , function: transmission_end , line 347, message: SENDER FINISH SENDING
-[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 30
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /ok 8168105391214742685 24309
-
-[DEBUG] File: src/sending_files.c , function: parse_command , line 222, message: command '/ok' was founded
-[INFO] File: src/sending_files.c , function: send_chunk , line 251, message: SEDNER: finish sending file data!
-[INFO] File: src/sending_files.c , function: close_file_ch , line 360, message: sendfer close file channel
-[DEBUG] File: src/sending_files.c , function: parse_file_data , line 195, message: buffer_offset = 30
-[INFO] File: src/sending_files.c , function: parse_file_data , line 196, message: bytes left in the buffer: 0
-[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
-[DEBUG] File: src/user_interface.c , function: file_request , line 334, message: user choice = C
+[INFO] File: src/callbacks.c , function: join_room , line 383, message: client join room: hello
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 577, message: hello
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 583, message: HELLO
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 104
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 104
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 10
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 9
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 8
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 7
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 6
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 5
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 4
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 3
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 2
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 1
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 10
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 9
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 8
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 7
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 6
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 5
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 4
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 3
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 2
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 1
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 2
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 1
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 0
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 104
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 118
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 110
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 110
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 118
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 110
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 110
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 99
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 99
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 110
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 99
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 99
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 99
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 83
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 67
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 110
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 68
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 67
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 32
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 83
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 68
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 99
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 98
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 115
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 65
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 64
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 63
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 62
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 61
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 60
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 59
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 58
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 57
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 56
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 55
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 54
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 53
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 52
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 51
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 50
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 49
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 48
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 47
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 46
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 45
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 44
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 43
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 42
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 41
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 40
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 39
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 38
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 37
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 36
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 35
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 34
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 33
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 32
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 31
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 30
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 29
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 28
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 27
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 26
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 25
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 24
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 23
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 22
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 21
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 20
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 19
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 18
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 17
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 16
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 15
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 14
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 13
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 12
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 11
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 10
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 9
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 8
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 7
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 263
+[DEBUG] File: src/user_interface.c , function: delete_symbol , line 954, message: buf_size = 6
+[INFO] File: src/user_interface.c , function: delete_symbol , line 968, message: delete one symbol
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 103
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 102
+[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 100

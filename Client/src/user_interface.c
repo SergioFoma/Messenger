@@ -84,12 +84,11 @@ windows_t* create_background( winsize_t* console_size ){
 ui_stat_t create_name_win( winsize_t* console_size, windows_t* windows ){
     assert( console_size );
 
-    int nlines = 0;
-    int ncolumns = 0;
-    int begin_y = 0;
-    int begin_x = 0;
+    int nlines = 0, ncolumns = 0;
+    int begin_y = 0, begin_x = 0;
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
 
-    nlines = 4, ncolumns = 70, begin_x = console_size->ws_col / 3 + 5, begin_y = 0;
+    nlines = 0.07 * max_nlines, ncolumns = 0.3 * max_columns, begin_x = 0.361 * max_columns, begin_y = 0;
     WINDOW* name_win = newwin( nlines, ncolumns, begin_y, begin_x );
     if( name_win == NULL ){
         log_fatal( "window with messenger name is null ptr\n" );
@@ -98,7 +97,7 @@ ui_stat_t create_name_win( winsize_t* console_size, windows_t* windows ){
     windows->name_win = name_win;
     wbkgd( name_win, COLOR_PAIR( NAME_BACK ) );
 
-    begin_x = 25, begin_y = 2;
+    begin_x = 0.4 * ncolumns, begin_y = 0.5 * nlines;
     wattron( name_win, A_BOLD );
     mvwaddstr( name_win, begin_y, begin_x, "MESSENGER SAVA" );             // moves the cursor to position (x;y) and prints the string
     wattroff( name_win, A_BOLD );
@@ -114,11 +113,11 @@ ui_stat_t create_name_win( winsize_t* console_size, windows_t* windows ){
 user_info_t* client_registration( winsize_t* console_size, windows_t* windows ){
     assert( console_size );
     assert( windows );
-
-    int nlines = 10;
-    int ncolumns = 40;
-    int begin_x = console_size->ws_col / 3 + 15;
-    int begin_y = console_size->ws_row / 3;
+	
+    // 10 *  40
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = 0.17 * max_nlines, ncolumns = 0.17 * max_columns;
+    int begin_x = 0.4 * max_columns, begin_y = 0.34 * max_nlines;
 
     WINDOW* reg_win = newwin( nlines, ncolumns, begin_y, begin_x );
     if( reg_win == NULL ){
@@ -130,7 +129,7 @@ user_info_t* client_registration( winsize_t* console_size, windows_t* windows ){
     wbkgd( reg_win, COLOR_PAIR( REG_BACK ) );
     keypad( reg_win, TRUE );                                                     // special key
 
-    begin_x = 10, begin_y = 1;
+    begin_x = 0.25 * ncolumns, begin_y = 1;
     wattron( reg_win, A_BOLD );
     mvwaddstr( reg_win, begin_y, begin_x, "PLEASE, REGISTER");
     begin_x = 0, begin_y = 2;
@@ -152,11 +151,12 @@ user_info_t* client_registration( winsize_t* console_size, windows_t* windows ){
 
 room_position_t* create_room_list( winsize_t* console_size ){
     assert( console_size );
-
-    int ncolumns = 40;
-    int begin_x = 1;
-    int begin_y = 1;
-    WINDOW* room_win = newwin( console_size->ws_row - 2, ncolumns, begin_y, begin_x );
+    
+    // 59 * 40
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = max_nlines - 2, ncolumns = 0.17 * max_columns;
+    int begin_x = 1, begin_y = 1;
+    WINDOW* room_win = newwin( nlines, ncolumns, begin_y, begin_x );
     if( room_win == NULL ){
         log_fatal( "room window is null ptr" );
         return NULL;
@@ -164,7 +164,7 @@ room_position_t* create_room_list( winsize_t* console_size ){
     wbkgd( room_win, COLOR_PAIR( ROOM_BACK ) );
 
     wattron( room_win, A_BOLD );
-    begin_x = 13, begin_y = 1;
+    begin_x = 0.23 * ncolumns, begin_y = 1;
     mvwaddstr( room_win, begin_y, begin_x, "ROOMS LIST" );
     begin_x = 0, begin_y = 2;
     mvwhline( room_win, begin_y, begin_x, ACS_HLINE, ncolumns );
@@ -240,11 +240,11 @@ ui_stat_t check_connect_possibility( char* room_name ){
 
 ui_stat_t create_menu( windows_t* windows, winsize_t* console_size ){
     assert( console_size );
-
-    int nlines = 20;
-    int ncolumns = 70;
-    int begin_x = console_size->ws_col / 3 + 5;
-    int begin_y = console_size->ws_row / 3;
+    
+    // 20 * 70
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = 0.33 * max_nlines, ncolumns = 0.29 * max_columns;
+    int begin_x = 0.361 * max_columns, begin_y = 0.34 * max_nlines;
 
     WINDOW* menu_win = newwin( nlines, ncolumns, begin_y, begin_x );
     if( menu_win == NULL ){
@@ -255,7 +255,7 @@ ui_stat_t create_menu( windows_t* windows, winsize_t* console_size ){
     keypad( menu_win, TRUE );
 
     wattron( menu_win, A_BOLD );
-    begin_x = 25, begin_y = 1;
+    begin_x = 0.34 * ncolumns, begin_y = 1;
     mvwaddstr( menu_win, begin_y, begin_x, "SELECT AN OPTION" );
     begin_x = 0, begin_y = 2;
     mvwhline( menu_win, begin_y, begin_x, ACS_HLINE, ncolumns );
@@ -357,80 +357,102 @@ ui_stat_t create_room( room_position_t* room_pos, winsize_t* console_size, char*
     assert( room_pos );
     assert( console_size );
     assert( room_name );
-
+    
     log_info( "room name: %s", room_name );
-    WINDOW* room_win = newwin( room_pos->nlines, room_pos->ncolumns, room_pos->begin_y, room_pos->begin_x );
+
+    int nlines = room_pos->nlines, columns = room_pos->ncolumns;
+    WINDOW* room_win = newwin( nlines, columns, room_pos->begin_y, room_pos->begin_x );
     if( room_win == NULL ){
         log_fatal( "room window is null ptr" );
         return WINDOW_ERR;
     }
+     if( !add_chat( room_name, room_win ) ){
+	delwin( room_win );
+	return FIN_CREATE_ROOM;
+    }
     wbkgd( room_win, COLOR_PAIR( ONE_ROOM ) );
 
-    int begin_x = 10;
+    int begin_x = 0.34 * columns;
     int begin_y = 1;
     wattron( room_win, A_BOLD );
     mvwaddstr( room_win, begin_y, begin_x, "CHAT" );
     begin_x = 0, begin_y = 2;
-    mvwhline( room_win, begin_y, begin_x, ACS_HLINE, room_pos->ncolumns );
+    mvwhline( room_win, begin_y, begin_x, ACS_HLINE, columns );
     begin_x = 2, begin_y = 3;
     mvwprintw( room_win, begin_y, begin_x, "NAME: %s", room_name );
     box( room_win, 0, 0 );
     wrefresh( room_win );
 
-    add_chat( room_name, room_win );
     room_pos->begin_x = room_pos->begin_x;
     room_pos->begin_y = room_pos->begin_y + room_pos->nlines;
     room_pos->status = CORRECT_STATE;
     return FIN_CREATE_ROOM;
 }
 
-void add_chat( char* room_name, WINDOW* chat_win ){
+bool add_chat( char* room_name, WINDOW* chat_win ){
     assert( chat_win );
     assert( room_name );
-
-    names_reallocation();
-    chats_reallocation();
+    
+    if( rooms_info.len == INIT_COUNT_ROOMS ){
+	log_warning( "too many rooms" );
+	return false;
+    }
+    bool name_realloc = names_reallocation( rooms_info.capacity );
+    bool chat_realloc = chats_reallocation( rooms_info.capacity );
     rooms_info.room_names[ rooms_info.len ] = strdup( room_name );
     rooms_info.chat_windows[ rooms_info.len ] = chat_win;
     ++rooms_info.len;
+    
+    if( name_realloc || chat_realloc ){
+	rooms_info.capacity *= 2;
+    }
 
     log_debug( "added room: %s", room_name );
+    return true;
 }
 
-void names_reallocation(){
+bool names_reallocation( size_t old_size ){
 
     char** realloc_buf = NULL;
-    if( rooms_info.len == rooms_info.capacity - 1 ){
-        rooms_info.capacity *= 2;
-        realloc_buf = (char**)realloc( rooms_info.room_names, sizeof(char*) * rooms_info.capacity );
+    if( rooms_info.len >= old_size - 1 ){
+        size_t new_size = old_size * 2;
+        realloc_buf = (char**)realloc( rooms_info.room_names, sizeof(char*) * new_size );
         if( realloc_buf == NULL ){
             log_fatal( "realloc return NULL ptr" );
-            return;
+            return false;
         }
         rooms_info.room_names = realloc_buf;
+	return true;
     }
+
+    return false;
 }
 
-void chats_reallocation(){
+bool chats_reallocation( size_t old_size ){
 
     WINDOW** realloc_windows = NULL;
-    if( rooms_info.len == rooms_info.capacity - 1 ){
-        rooms_info.capacity *= 2;
-        realloc_windows = (WINDOW**)realloc( rooms_info.chat_windows, sizeof(WINDOW*) );
+    if( rooms_info.len >= old_size - 1 ){
+        size_t new_size = old_size * 2;
+        realloc_windows = (WINDOW**)realloc( rooms_info.chat_windows, sizeof(WINDOW*) * new_size );
         if( realloc_windows == NULL ){
             log_fatal( "realloc return NULL ptr" );
-            return ;
+            return false;
         }
         rooms_info.chat_windows = realloc_windows;
+	return true;
     }
+
+    return false;
 }
 
 ui_stat_t create_room_name_win( winsize_t* console_size, windows_t* windows ){
         assert( console_size );
 
-        int nlines = 5, ncolumns = 42;
+	// 5 * 42
+	int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+        int nlines = 0.1 * max_nlines, ncolumns = 0.17 * max_columns;
         int der_nlines = nlines - 2, der_ncolumns = ncolumns - 2;
-        int begin_x = console_size->ws_col / 3 + 15, begin_y = console_size->ws_row / 3;
+        int begin_x = 0.41 * max_columns, begin_y = 0.34 * max_nlines;
         int der_begin_x = 1, der_begin_y = 1;
 
         WINDOW* room_name_win = newwin( nlines, ncolumns, begin_y, begin_x );
@@ -451,7 +473,7 @@ ui_stat_t create_room_name_win( winsize_t* console_size, windows_t* windows ){
         keypad( der_name_win, TRUE );
 
         wattron( der_name_win, A_BOLD );
-        mvwaddstr( der_name_win, 0, 10, "ENTER THE ROOM NAME" );
+        mvwaddstr( der_name_win, 0, 0.25 * der_ncolumns, "ENTER THE ROOM NAME" );
         wattroff( der_name_win, A_BOLD );
 
         wrefresh( room_name_win );
@@ -466,11 +488,13 @@ ui_stat_t create_room_name_win( winsize_t* console_size, windows_t* windows ){
 ui_stat_t create_manage_menu( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
-
-    int ncolumns = 40;
-    int begin_x = console_size->ws_col - ncolumns;
+    
+    // (max - 2) * 40
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = max_nlines - 2, ncolumns = 0.17 * max_columns;
+    int begin_x = max_columns - ncolumns;
     int begin_y = 1;
-    WINDOW* manage_menu = newwin( console_size->ws_row - 2, ncolumns, begin_y, begin_x );
+    WINDOW* manage_menu = newwin( nlines, ncolumns, begin_y, begin_x );
     if( manage_menu == NULL ){
         log_fatal( "error creating manage menu" );
         return WINDOW_ERR;
@@ -479,7 +503,7 @@ ui_stat_t create_manage_menu( windows_t* windows, winsize_t* console_size ){
     keypad( manage_menu, TRUE );
 
     wattron( manage_menu, A_BOLD );
-    begin_x = 13, begin_y = 1;
+    begin_x = 0.33 * nlines, begin_y = 1;
     mvwaddstr( manage_menu, begin_y, begin_x, "MANAGE MENU" );
     begin_x = 0, begin_y = 2;
     mvwhline( manage_menu, begin_y, begin_x, ACS_HLINE, ncolumns );
@@ -523,13 +547,11 @@ ui_stat_t create_chat_background( windows_t* windows, winsize_t* console_size, c
 ui_stat_t create_chat_name( windows_t* windows, winsize_t* console_size, char* room_name ){
     assert( console_size );
     assert( room_name );
-
-    int nlines = 0;
-    int ncolumns = 0;
-    int begin_y = 0;
-    int begin_x = 0;
-
-    nlines = 4, ncolumns = 60, begin_x = console_size->ws_col / 3 + 15, begin_y = 0;
+    
+    // 4 * 60
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = 0.085 * max_nlines, ncolumns = 0.25 * max_columns;
+    int begin_y = 0, begin_x = 0.41 * max_columns ;
     WINDOW* name_win = newwin( nlines, ncolumns, begin_y, begin_x );
     if( name_win == NULL ){
         log_fatal( "window with messenger name is null ptr\n" );
@@ -537,7 +559,7 @@ ui_stat_t create_chat_name( windows_t* windows, winsize_t* console_size, char* r
     }
     wbkgd( name_win, COLOR_PAIR( NAME_BACK ) );
 
-    begin_x = 25, begin_y = 2;
+    begin_x = 0.42 * ncolumns, begin_y = 2;
     wattron( name_win, A_BOLD );
     // moves the cursor to position (x;y) and prints the string
     mvwprintw( name_win, begin_y, begin_x, "%s", make_uppercase_line( room_name ) );
@@ -566,10 +588,11 @@ ui_stat_t create_chat_menu( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
 
-    int ncolumns = 40;
-    int begin_x = console_size->ws_col - ncolumns;
-    int begin_y = 0;
-    WINDOW* chat_menu = newwin( console_size->ws_row, ncolumns, begin_y, begin_x );
+    // max * 40
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = max_nlines, ncolumns = 0.162 * max_columns;
+    int begin_x = max_columns - ncolumns, begin_y = 0;
+    WINDOW* chat_menu = newwin( nlines, ncolumns, begin_y, begin_x );
     if( chat_menu == NULL ){
         log_fatal( "error creating manage menu" );
         return WINDOW_ERR;
@@ -578,7 +601,7 @@ ui_stat_t create_chat_menu( windows_t* windows, winsize_t* console_size ){
     keypad( chat_menu, TRUE );
 
     wattron( chat_menu, A_BOLD );
-    begin_x = 13, begin_y = 1;
+    begin_x = 0.053 * max_columns, begin_y = 1;
     mvwaddstr( chat_menu, begin_y, begin_x, "CHAT MENU" );
     begin_x = 0, begin_y = 2;
     mvwhline( chat_menu, begin_y, begin_x, ACS_HLINE, ncolumns );
@@ -613,7 +636,9 @@ ui_stat_t create_history_win( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
 
-    int ncolumns = 50, nlines = console_size->ws_row;
+    // max * 50
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int ncolumns = 0.21 * max_columns, nlines = max_nlines;
     int begin_x = 0, begin_y = 0;
     int der_ncolumns = ncolumns - 2, der_nlines = nlines - 2;
     int der_begin_x = 1, der_begin_y = 1;
@@ -631,7 +656,7 @@ ui_stat_t create_history_win( windows_t* windows, winsize_t* console_size ){
     wbkgd( der_history_win, COLOR_PAIR( HISTORY_BACK ) );
 
     wattron( der_history_win, A_BOLD );
-    der_begin_x = 15, der_begin_y = 0;
+    der_begin_x = 0.34 * der_ncolumns, der_begin_y = 0;
     mvwaddstr( der_history_win, der_begin_y, der_begin_x, "CHAT HISTORY" );
     begin_x = 1, begin_y = 2;
     mvwhline( history_win, begin_y, begin_x, ACS_HLINE, der_ncolumns );
@@ -646,16 +671,20 @@ ui_stat_t create_history_win( windows_t* windows, winsize_t* console_size ){
     wmove( der_history_win, der_begin_y, der_begin_x );         // move to begining
     input_line_pos.history_x = der_begin_x;
     input_line_pos.history_y = der_begin_y;
+    input_line_pos.hst_row = der_nlines;
+    input_line_pos.hst_col = der_ncolumns;
     return CORRECT_STATE;
 }
 
 ui_stat_t create_companion_win( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
-
-    int nlines = 15, ncolumns = 60;
+ 
+    // 15 * 60
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = 0.25 * max_nlines, ncolumns = 0.25 * max_columns;
     int der_nlines = nlines - 2, der_ncolumns = ncolumns - 2;
-    int begin_x = console_size->ws_col / 3 + 15, begin_y = console_size->ws_row / 5;
+    int begin_x = 0.41 * max_columns, begin_y = 0.2 * max_nlines;
     int der_begin_x = 1, der_begin_y = 1;
 
     WINDOW* companion_win = newwin( nlines, ncolumns, begin_y, begin_x );
@@ -671,7 +700,7 @@ ui_stat_t create_companion_win( windows_t* windows, winsize_t* console_size ){
     wbkgd( der_companion_win, COLOR_PAIR( CHAT_BACK ) );
     keypad( der_companion_win, TRUE );
 
-    der_begin_x = 15, der_begin_y = 0;
+    der_begin_x = 0.25 * der_ncolumns, der_begin_y = 0;
     wattron( der_companion_win, A_BOLD );
     mvwaddstr( der_companion_win, der_begin_y, der_begin_x, "MESSAGE FROM OTHER USERS");
     begin_x = 1, begin_y = 2;
@@ -695,9 +724,11 @@ ui_stat_t create_companion_win( windows_t* windows, winsize_t* console_size ){
 ui_stat_t create_user_win( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
-
-    int nlines = 15, ncolumns = 60;
-    int begin_x = console_size->ws_col / 3 + 15, begin_y = console_size->ws_row / 5 + nlines * 1.5 + 5;
+    
+    // 15 * 60
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = 0.25 * max_nlines, ncolumns = 0.25 * max_columns;
+    int begin_x = 0.41 * max_columns, begin_y = 0.2 * max_nlines + nlines * 1.7;
     int der_nlines = nlines - 2, der_ncolumns = ncolumns - 2;
     int der_begin_x = 1, der_begin_y = 1;
 
@@ -714,7 +745,7 @@ ui_stat_t create_user_win( windows_t* windows, winsize_t* console_size ){
     wbkgd( der_user_win, COLOR_PAIR( CHAT_BACK ) );
     keypad( der_user_win, TRUE );
 
-    der_begin_x = 20, der_begin_y = 0;
+    der_begin_x = 0.33 * der_ncolumns, der_begin_y = 0;
     wattron( der_user_win, A_BOLD );
     mvwaddstr( der_user_win, der_begin_y, der_begin_x, "ENTER YOUR MESSAGE");
     begin_x = 1, begin_y = 2;
@@ -732,6 +763,8 @@ ui_stat_t create_user_win( windows_t* windows, winsize_t* console_size ){
     getyx( der_user_win, y, x );                                            // of the iput line
     input_line_pos.user_x = x;
     input_line_pos.user_y = y;
+    input_line_pos.input_row = der_nlines;
+    input_line_pos.input_col = der_ncolumns;
     return CORRECT_STATE;
 }
 
@@ -739,8 +772,10 @@ ui_stat_t create_list_win( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
 
-    int nlines = 42, ncolumns = 60;
-    int begin_x = console_size->ws_col / 3 + 15, begin_y = console_size->ws_row / 5;
+    // 42 * 60
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = 0.69 * max_nlines, ncolumns = 0.25 * max_columns;
+    int begin_x = 0.41 * max_columns, begin_y = 0.2 * max_nlines;
     int der_nlines = nlines - 2, der_ncolumns = ncolumns - 2;
     int der_begin_x = 1, der_begin_y = 1;
 
@@ -757,7 +792,7 @@ ui_stat_t create_list_win( windows_t* windows, winsize_t* console_size ){
     wbkgd( der_list_win, COLOR_PAIR( CHAT_BACK ) );
     keypad( der_list_win, TRUE );
 
-    der_begin_x = 20, der_begin_y = 0;
+    der_begin_x = 0.33 * der_ncolumns, der_begin_y = 0;
     wattron( der_list_win, A_BOLD );
     mvwaddstr( der_list_win, der_begin_y, der_begin_x, "ROOM INFORMATION");
     der_begin_x = 0, der_begin_y = 1;
@@ -804,8 +839,10 @@ ui_stat_t file_window( winsize_t* console_size, windows_t* windows, char* info_l
     assert( windows );
     assert( info_line );
 
-    int nlines = 8, ncolumns = 60;
-    int begin_x = console_size->ws_col / 3 + 15, begin_y = console_size->ws_row / 3 + 8;
+    // 8 * 60
+    int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
+    int nlines = 0.132 * max_nlines, ncolumns = 0.25 * max_columns;
+    int begin_x = 0.41 * max_columns, begin_y = 0.47 * max_nlines;
     int der_nlines = nlines - 2, der_ncolumns = ncolumns - 2;
     int der_begin_x = 1, der_begin_y = 1;
 
@@ -822,16 +859,18 @@ ui_stat_t file_window( winsize_t* console_size, windows_t* windows, char* info_l
     wbkgd( der_file_win, COLOR_PAIR( CHAT_BACK ) );
     keypad( der_file_win, TRUE );
 
-    der_begin_x = 15, der_begin_y = 0;
+    der_begin_x = 0.25 * der_ncolumns, der_begin_y = 0;
     wattron( der_file_win, A_BOLD );
     mvwprintw( der_file_win, der_begin_y, der_begin_x, "%s", info_line );
-    der_begin_x = 1, der_begin_y = 1;
+    der_begin_x = 0, der_begin_y = 1;
     mvwhline( der_file_win, der_begin_y, der_begin_x, ACS_HLINE, ncolumns );          // ACS_HLINE - for a solid line
 
     der_begin_x = 1, der_begin_y = 2;
     wmove( der_file_win, der_begin_y, der_begin_x );
     input_line_pos.file_x = der_begin_x;
     input_line_pos.file_y = der_begin_y;
+    input_line_pos.file_row = der_nlines;
+    input_line_pos.file_col = der_ncolumns;
 
     wattroff( der_file_win, A_BOLD );
 
@@ -912,14 +951,18 @@ void delete_symbol( size_t* buf_size, WINDOW* window ){
     assert(buf_size);
     assert(window);
 
+    log_debug( "buf_size = %lu", *buf_size );
+
     int x = -1;
     int y = -1;
     getyx( window, y, x );
+    ++x;
+    wmove( window, y, x);
 
     if( x > 0 && *buf_size > 0 ){
-        waddch( window, ' ' );              // print whitespace, after command x = ( x - 1 ) + 1 = x
-        wrefresh( window );
-        wmove( window, y, x );              // move back 1 char
+	wmove( window, y, x - 1 );
+	waddch( window, ' ' );
+	wmove( window, y, x - 1 );
         wrefresh( window );
         --(*buf_size);
         log_info( "delete one symbol" );
@@ -1090,11 +1133,11 @@ void clear_input_line( WINDOW* win, ui_stat_t state ){
     }
     wmove( win, y, x );
 
-    const int ncolumns = 60;
-    const int nlines = 15;
+    const int ncolumns = input_line_pos.input_col;
+    const int nlines = input_line_pos.input_row;
     // clear the user line after entering a message
     // max column: ncolumns - 1  - 1 - strlen( "MESSAGE: ") = 60 - 1 - 1 - 9 = 49
-    mvwhline( win, y, x, ' ', 48 );                                          // ACS_HLINE - for a solid line
+    mvwhline( win, y, x, ' ', ncolumns );                                          // ACS_HLINE - for a solid line
 
     int current_line = y + 1, current_column = 0;
     for(; current_line < nlines; current_line++ ){
@@ -1113,8 +1156,8 @@ void clear_history_line( WINDOW* win, winsize_t* console_size ){
 
     wmove( win, y, x );
 
-    const int ncolumns = 50;
-    const int nlines = console_size->ws_row;
+    const int ncolumns = input_line_pos.input_col;
+    const int nlines = input_line_pos.input_row;
 
     int current_line = y, current_column = 0;
     for(; current_line < nlines; current_line++ ){
@@ -1133,8 +1176,8 @@ void clear_file_line( WINDOW* win ){
 
     wmove( win, y, x );
 
-    const int ncolumns = 60;
-    const int nlines = 6;
+    const int ncolumns = input_line_pos.file_col;
+    const int nlines = input_line_pos.file_row;
 
     int current_line = y, current_column = 0;
     for(; current_line < nlines; current_line++ ){
@@ -1156,6 +1199,13 @@ void close_window( WINDOW* window ){
     wrefresh( window );
     delwin( window );
 
+}
+
+void close_messenger( user_info_t* user_data ){
+    assert( user_data );
+
+    destroy_background();
+    destroy_user( user_data );
 }
 
 void destroy_background(){

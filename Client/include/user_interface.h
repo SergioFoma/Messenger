@@ -68,6 +68,12 @@ typedef struct input_line_pos_s {
     int history_y;
     int file_x;
     int file_y;
+    int input_col;
+    int input_row;
+    int hst_col;
+    int hst_row;
+    int file_col;
+    int file_row;
 } input_line_pos_t;
 
 typedef struct windows_s {
@@ -175,11 +181,11 @@ void update_original_windows( windows_t* windows, room_position_t* room_pos );
 
 void update_window( WINDOW* win );
 
-void add_chat( char* room_name, WINDOW* chat_win );
+bool add_chat( char* room_name, WINDOW* chat_win );
 
-void names_reallocation();
+bool names_reallocation( size_t old_size );
 
-void chats_reallocation();
+bool chats_reallocation( size_t old_size );
 
 void destroy_rooms_info();
 
@@ -220,6 +226,8 @@ void close_file_windows( windows_t* windows );
 void delete_symbol( size_t* buf_size, WINDOW* window );
 
 void close_window( WINDOW* window );
+
+void close_messenger( user_info_t* user_data );
 
 void destroy_user( user_info_t* user_data );
 
