@@ -1,32 +1,194 @@
 [INFO] File: src/logger.c , function: open_log_file , line 13, message: success open log file
-[INFO] File: src/user_interface.c , function: get_console_size , line 50, message: default console size: nlines = 59, ncolumns = 248
-[INFO] File: src/callbacks.c , function: start_registration , line 38, message: IP: 10.55.131.69
-[INFO] File: src/client.c , function: main , line 51, message: loop start ... 
-[INFO] File: src/callbacks.c , function: connect_cb , line 85, message: read start
-[INFO] File: src/user_interface.c , function: create_room , line 361, message: room name: TESTIC
-[DEBUG] File: src/user_interface.c , function: add_chat , line 410, message: added room: TESTIC
-[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 230, message: current name = 'TESTIC', room name = 'TESTIC'
-[INFO] File: src/user_interface.c , function: check_connect_possibility , line 232, message: room was found
-[INFO] File: src/callbacks.c , function: join_room , line 383, message: client join room: TESTIC
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 577, message: TESTIC
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 583, message: TESTIC
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = 'Hello!
+[INFO] File: src/user_interface.c , function: get_console_size , line 52, message: default console size: nlines = 59, ncolumns = 248
+[INFO] File: src/callbacks.c , function: start_registration , line 45, message: IP: 80.87.201.176
+[INFO] File: src/client.c , function: main , line 53, message: loop start ... 
+[INFO] File: src/callbacks.c , function: connect_cb , line 92, message: read start
+[INFO] File: src/user_interface.c , function: create_room , line 451, message: room name: test_file
+[DEBUG] File: src/user_interface.c , function: add_chat , line 500, message: added room: test_file
+[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 263, message: current name = 'test_file', room name = 'test_file'
+[INFO] File: src/user_interface.c , function: check_connect_possibility , line 265, message: room was found
+[INFO] File: src/callbacks.c , function: join_room , line 392, message: client join room: test_file
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 667, message: test_file
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 673, message: TEST_FILE
+[DEBUG] File: src/callbacks.c , function: show_server_message , line 618, message: Message from server = '/recipients_ID 8168105391373623553 ava.jpeg
 '
-[WARNING] File: src/callbacks.c , function: find_srv_command , line 658, message: command was not found
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 72
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 121
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 33
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 10
-[INFO] File: src/callbacks.c , function: send_message , line 491, message: client send message: Hy!
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+[DEBUG] File: src/user_interface.c , function: file_request , line 424, message: user choice = Y
+[INFO] File: src/sending_files.c , function: open_new_connection , line 72, message: successfully connected to file chanel
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1058
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 0 1024 ÿØÿÛ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1058
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 1024 1024 <ÔÊÑæ°¬Z“–f·
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 2048 1024 ‚*@7zóMİÏ&¤Ø)
+V%’‰>QƒFìOZÍ»Ô,ôöUº»†İ¸Õ˜äó]:°È`r«'©+/Í@úSãõ¡’£šÌ¡À®9¨NsKĞóM<{Õ§s¬zŒö¦y­ëÅËpj2:Ó%1ÆN1Š‰†î™§u§"Òf‰´õ!È‘šs2”§H˜çŠ‡a©jå©.€WÍª2›jeVC‘HêØäRrÔ,ˆ
+ƒÅ#!^ii­+Æj¬C’ÔÒE7­7LÎú&ÜP‰¸dPÍMÊµÎ¥K¼Ò…ÃA#µ">=óV`ª\â¨‰M­‡Åë=êÂ©¦ú”pAÏ¥T—V.1ÛLÏ–RfÁtN¬D÷q/Ba5Ì’–&”60I44k+©µöÕÇlšO9[•’¬*tsÓ5ÑA#D2‘‘ŠzÈ:f¨«úÔƒŞ57‰t'Òœ$TU!!CÖ¦YÕÍÅ4Ìå¹a'Œ·$­]Ñ†2+=R)	Á©’wúPÕÈêOpÊŠ@ õ¬ö·M¹gÚ¬º1$T/¦’V4L®mÃ)ş÷ó¨~ÌêH©Û+À<Ò¤…¸j¤7&†ÀLYr>•`²8Ê°ÍFdUÎ@]î#¾ÔÌÛr3qŒš§$xäSÚ`İ3M-õ ¸«Ü:f£(Äd
+°ò(íøSK3¦Ëæ ÈQóLgö5amœ$ÕŸ°‚G
+Z"¹®fîq‚·µK»FÚĞd3JÖå³($œRæ‚åŠ6’V
+ˆ¥™@S\”¾?µæxâ±’hÔâ)`9¾ƒõ«^4Öì×I“O¶¸YgŸho)
+¹“ïé^rw‚2ŒäÖ°…ÕÙË_âíKvÓßİÍ<Ï™¥bÌHıòÅoxc_x/†Ñ—(«ÉWöúÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 3072 1024 ZpCš—bÉÖRN³ã½T
+iØ T°±sÍM,=jNx§"•…bÚÎc`C¿ğu!cã4à§4îD ™¶—‹İ¦Ë:‘…nd€})C²Ğ.BÓ¿<hWsÍVóR®)‡)dã‘LòPöæˆä
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 4096 1024 ·¾2?:ó-Bö{¢%¼º’y1Îsè+'PÔî5+É./&’Y[«Ğp8ôªûˆÎ\:k¢0åGJÜïÈÒşÑ!WŒuaş=Ü­(¡w£œ}?*ÏM ôÁï€M\ˆˆ¾I{ğ@›ĞÍjF_¡l³s’iEÁ@Ù,Û†Aÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 5120 1024 ¾\hÏ™$“€+¥{ªÈà›s•ÙXD rp3šhA×3ş 
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 6144 1024 ’§ê95ÎÜİ*I±û–=+ï¤ –]ÎsƒÖ´Œ"¼ÌgU½Î¶ÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 7168 1024 ²{Rñ‚_¡ç¥Kr‹˜^…Ao^j3"g À>™¤•fã¶iÜ,{Buç9<S
+¢Äs´¢Müg'·ìyx
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 8192 1024 el?1ReŒ¹q–†<gŠp¬JİÏnµ4»²qqÒ‹–!¶FfÀöÈõ§ÜL÷ädÆ½7rj»+É¯8<Ó•ó· †Ç<Ñf;c´‚@ÜÜÔnŠÅqò``÷ÍYÚJa×¯#éQ‘ŒåyşT!2°\àÎ¤Fu“)¹Hî=)­…äÂ­@¾dM(V?6ĞëT.¢¤†'Âœ‚GÆkB)Ğ±1É
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1061
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 9216 1024 %e¶ĞAğ§¤`§h d’s“T„M[%ŒKş­ÁcíPº°;[*zckBFÖ/0Æ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1061
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 10240 1024 ¦K…
+‡<À^h•%pPıÖ>”Eê)\vW ùk ¥%‰b
+ş#­
+åàõÇZœGb
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 11264 1024 NA Ÿö}jlæ0@#ĞœsIlTQå¼}M”(A$°ÁàS'Pø`}ˆô¡‡]81iJŒsïNYÙ7 ¸æ¢—záñ€F*+<A!s}0Oô .IåI·
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 12288 1024 §’;>pF8=é°C˜1ûËÃpqP”0ğFéš°r„\®:súPò4‘_»ÔsŞ•Á‘ìœÏ¿,1ù‰UH=ı8¨"“jã#§ĞÓÛ–\„gÄ˜„Ÿ0H•y#ÅJ»ØUÎxç˜EL«?(øñŠq›
+˜\‘Ô6y¦Æ™b9"!’Äÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 13312 1024 B*GU1rİ¸\L±Íå»væªÜİÅÎ#Š¡\´×Ê’`dñØğGµ2æğL„s…9Á8Íf1†¸§°ç'8‹˜œ³`¨'–îjà˜G
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 14336 1024 ar Ú¢<“È {Ü¬HÅ1dÊàwâ‘G9<Œtô©…7zLœ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 15360 1024 ÷~¿¥E­)¼”ÌcdeùY>î1Ø×'Öšƒos§êö•ºW7-q,ŒIÃ1$ö¡$1ŒÌqO¸/ò±*;cœ§õt#jü!}kÊçdRµ‰-­äŸä‰7=‰ . ´!Ü0œƒÇ^•‹âuCëÜV•¯•òKlÁVsĞuæ®E¹#teÏoˆHÓƒ3”ÇOÇÖ´od†+x’Rvƒ€x\çŸZÍ•]îI`w<=i~ÎÅÆüm<’;õ©{K]É{2»¶âI9É"¥XLø 1#’zš_$°scõ«š{~ü	S;€^8¨º-±–‘ù“¬$¸ã àWC¬QÇ8ŸZBªHLÒÉ$)Ç­zT(*o˜ó«ÖsÑVe+–
+ÊGEa½¤pOy¥|¯À#=kni¾Ï	ó
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 16384 1024 Ö»/s’Ú
+cİĞğGJWePyêAéVÕÑŸN+>õ•’Ç’1ÅeZVƒ6¥i¢³Ü¦6~£­I‡vwè¬9¦¡‰á1†$‘‚
+?Âœ¢E
+Ì¥:ƒÏjòİ‘é`«âUHÈiÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 17408 1024 Ğ¤¨YVöXËGµT"Œ°õG™åXˆ-ååyîEg<âCç(E~r¹'?^Õ,–m{o†uCÄá\n´¹ì¶:=’åW0%RÒ·™/Ì	İıhq¥Û€Ã`î$úÒ²"ä…zœçŞ¥‰8hÁÚ?‹
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 18432 1024 t2¤¤ÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 19456 1024 ÎüEßjj»r:{VñÓB[fò#Üqjí´EİNx'Ş³Ö?0ç¢¦­Å1¸nB=:Q [“ÅqÀ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 20480 1024 	”ª‚S£Æ*iK¥Ìp¤ÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 21504 1024 Ì`¤qM–)îï¦c´1lòqÇj°âXB‰†åÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 1062
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 22528 1024 ±>F
+ŞÀsôéJíh&¬R¯¹„Œ	Ï;W¨ÿ
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 1062
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 1024
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 794
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /chunk 8168105391373623553 23552 757 ûËòÉå&cÜ\ó‚EP_5[/Ó9>õ$ÊòÄÀPzôÈ£ûYÀÚ}zÑd!Á×Ëlç¯åNi""BWîá‡4ñÂvƒ&î@¥Iä‰ 
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/chunk' was founded
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 794
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[INFO] File: src/sending_files.c , function: receiver_write_cb , line 528, message: IN RECEVIER: successfully saved 757
+[INFO] File: src/sending_files.c , function: read_cb , line 159, message: read got 27
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 176, message: IN PARS FILE DATA = /close 8168105391373623553
+
+[DEBUG] File: src/sending_files.c , function: parse_command , line 221, message: command '/close' was founded
+[INFO] File: src/sending_files.c , function: finish_downloading , line 570, message: receiver close file channel
+[DEBUG] File: src/sending_files.c , function: parse_file_data , line 197, message: buffer_offset = 27
+[INFO] File: src/sending_files.c , function: parse_file_data , line 202, message: string line after: 0
+[DEBUG] File: src/user_interface.c , function: file_request , line 424, message: user choice = C
+[DEBUG] File: src/callbacks.c , function: show_server_message , line 618, message: Message from server = 'Nice?
 '
-[WARNING] File: src/callbacks.c , function: find_srv_command , line 658, message: command was not found
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 104
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 111
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 119
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 63
-[WARNING] File: src/user_interface.c , function: parse_request , line 318, message: request was not recognized. User choice = 10
-[INFO] File: src/callbacks.c , function: send_message , line 491, message: client send message: how?
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 609, message: Message from server = 'i don't now
-'
-[WARNING] File: src/callbacks.c , function: find_srv_command , line 658, message: command was not found
+[WARNING] File: src/callbacks.c , function: find_srv_command , line 667, message: command was not found
+[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 78
+[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 105
+[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 99
+[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 101
+[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 10
+[INFO] File: src/callbacks.c , function: send_message , line 500, message: client send message: Nice

@@ -19,7 +19,7 @@ static const size_t AUTO_BASE = 0;		     // for strtoul
 static const int FILE_MOD = 0644;
 static const size_t BUFFERS_COUNT = 1;		     // for fs_write
 static const size_t MAX_DIGITS = 100;		     // for snprintf
-static const size_t PART_SIZE = 8192;		     
+static const size_t PART_SIZE = 1024;		     
 const char* CHUNK_PATH = "Transfers";
 
 chunk_command_t supported_commands[] = {
@@ -143,16 +143,15 @@ void parse_message( client_t* client, ssize_t nread, size_t (*on_cmd)( client_t*
 		break;
 	}
 	buf_start += buffer_offset;
-	
-	log_debug( "buffer_offset = %lu", buffer_offset );
-	log_info( "bytes left in the buffer: %lu", client->file_len - ( buf_start - client->file_buf ) );
-        if( buf_start < client->file_buf + client->file_len ){
-            memmove( client->file_buf, buf_start, client->file_len - ( buf_start - client->file_buf ) );
-        }
-        client->file_len -= buf_start - client->file_buf;
-	buf_start = client->file_buf;
-        log_info( "string line after: %lu", client->file_len );
+	client->file_len -= buffer_offset;	
     }
+	
+    log_debug( "buffer_offset = %lu", buffer_offset );
+    if( client->file_len > 0 && buf_start < client->file_buf + client->file_len ){
+        memmove( client->file_buf, buf_start, client->file_len - ( buf_start - client->file_buf ) );
+	log_info( "bytes left in the buffer: %lu", client->file_len - ( buf_start - client->file_buf ) );
+    };
+    log_info( "string line after: %lu", client->file_len );
 }
 
 size_t parse_instruction( client_t* client, char* string ){
