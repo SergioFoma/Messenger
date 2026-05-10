@@ -7,6 +7,7 @@
 #include <ctype.h>
 
 #include "logger.h"
+#include "network_functions.h"
 #include "user_interface.h"
 
 const size_t ONE = 1;
@@ -38,6 +39,7 @@ void init_colors(){
     init_pair( HISTORY_BACK, COLOR_BLACK, COLOR_YELLOW );
     init_pair( CHAT_BACK, COLOR_CYAN, COLOR_BLACK );
     init_pair( OPTION, COLOR_MAGENTA, COLOR_BLACK );
+    init_pair( REG, COLOR_MAGENTA, COLOR_BLUE );
 }
 
 winsize_t* get_console_size(){
@@ -113,10 +115,10 @@ ui_stat_t create_name_win( winsize_t* console_size, windows_t* windows ){
 user_info_t* client_registration( winsize_t* console_size, windows_t* windows ){
     assert( console_size );
     assert( windows );
-	
+
     // 10 *  40
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
-    int nlines = 0.17 * max_nlines, ncolumns = 0.17 * max_columns;
+    int nlines = 0.2 * max_nlines, ncolumns = 0.17 * max_columns;
     int begin_x = 0.4 * max_columns, begin_y = 0.34 * max_nlines;
 
     WINDOW* reg_win = newwin( nlines, ncolumns, begin_y, begin_x );
@@ -134,24 +136,55 @@ user_info_t* client_registration( winsize_t* console_size, windows_t* windows ){
     mvwaddstr( reg_win, begin_y, begin_x, "PLEASE, REGISTER");
     begin_x = 0, begin_y = 2;
     mvwhline( reg_win, begin_y, begin_x, ACS_HLINE, ncolumns );     // ACS_HLINE - for a solid line
-    begin_x = 2, begin_y = 4;
+    begin_x = 0, begin_y = 3;
+    show_option( reg_win, "*LEAVE THE MESSENGER: ", "F12", begin_y, REG );
+    begin_x = 0, begin_y = 4;
+    mvwhline( reg_win, begin_y, begin_x, ACS_HLINE, ncolumns );
+    begin_x = 2, begin_y = 5;
     mvwaddstr( reg_win, begin_y, begin_x, "IP: " );
     box( reg_win, 0, 0 );
     wrefresh( reg_win );
 
-    char* ip = (char*)calloc( MAX_IP_LEN, sizeof(char) );
-    wgetnstr( reg_win, ip, MAX_IP_LEN - 1 );
-    wattroff( reg_win, A_BOLD );
-
     user_info_t* user_data = (user_info_t*)calloc( ONE, sizeof(user_info_t) );
-    user_data->ip = ip;
     user_data->status = CORRECT_STATE;
     return user_data;
 }
 
+ui_stat_t get_ip( windows_t* windows, user_info_t* user_data ){
+    assert( user_data );
+    assert( windows );
+
+    WINDOW* reg_win = windows->reg_win;
+    char* ip = (char*)calloc( MAX_IP_LEN, sizeof(char) );
+    if( !ip ){
+	log_fatal( "error of gettig ip address" );
+	wattroff( reg_win, BOLD );
+	return HEAP_ERROR;
+    }
+    user_data->ip = ip;
+
+    int symbol = 0;
+    size_t index = 0;
+    while( ( symbol = wgetch( reg_win ) ) != '\n' ){
+	if(  symbol == KEY_F(12) ){
+	    wattroff( reg_win, BOLD );
+	    return CLOSE_MESSENGER;
+	}
+	else if( symbol == KEY_BACKSPACE || symbol == 127 || symbol == '\b' ){
+	    delete_symbol( &index, reg_win );
+	    continue;
+	}
+	ip[ index++ ] = symbol;
+    }
+
+    ip[ index++ ] = '\0';
+    wattroff( reg_win, BOLD );
+    return FIN_GET_IP;
+}
+
 room_position_t* create_room_list( winsize_t* console_size ){
     assert( console_size );
-    
+
     // 59 * 40
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
     int nlines = max_nlines - 2, ncolumns = 0.17 * max_columns;
@@ -240,7 +273,7 @@ ui_stat_t check_connect_possibility( char* room_name ){
 
 ui_stat_t create_menu( windows_t* windows, winsize_t* console_size ){
     assert( console_size );
-    
+
     // 20 * 70
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
     int nlines = 0.33 * max_nlines, ncolumns = 0.29 * max_columns;
@@ -260,9 +293,9 @@ ui_stat_t create_menu( windows_t* windows, winsize_t* console_size ){
     begin_x = 0, begin_y = 2;
     mvwhline( menu_win, begin_y, begin_x, ACS_HLINE, ncolumns );
     begin_y = begin_y + 2;
-    show_option( menu_win, "*CREATE A NEW CHAT: ", "F1", begin_y );
+    show_option( menu_win, "*CREATE A NEW CHAT: ", "F1", begin_y, KEY );
     begin_y = begin_y + 2;
-    show_option( menu_win, "*LEAVE THE MESSENGER: ", "F12", begin_y );
+    show_option( menu_win, "*LEAVE THE MESSENGER: ", "F12", begin_y, KEY );
 
     box( menu_win, 0, 0 );
     wrefresh( menu_win );
@@ -272,27 +305,79 @@ ui_stat_t create_menu( windows_t* windows, winsize_t* console_size ){
     return CORRECT_STATE;
 }
 
-ui_stat_t parse_request( WINDOW* window, user_info_t* user_data, const bool is_closing, int* available_symbol ){
+ui_stat_t parse_request( WINDOW* window, user_info_t* user_data, app_state_t app_state, int* available_symbol ){
     assert( user_data );
     assert( available_symbol );
     assert( window );
 
     nodelay( window, TRUE );                        // disabling blocking input
+    noecho();
     int user_choice = wgetch( window );
     if( user_choice == ERR ){
         log_info( "command was not read" );
         return READ_ERR;
     }
-    if( is_closing ){
-        close_window( window );
+
+    ui_stat_t ui_stat = CORRECT_STATE;
+    *available_symbol = -1;						// forget past data
+    switch( app_state ){
+	case START_MENU:
+	    ui_stat = start_menu( user_choice, user_data );
+	    if( ui_stat != NOTHING_DO && ui_stat != CLOSE_MESSENGER ){
+		close_window( window );
+	    }
+	    break;
+	case MANAGE_MENU:
+	    ui_stat = manage_menu( user_choice, user_data );
+	    break;
+	case USER_ACTION:
+	    ui_stat = chat_menu( window, user_choice, user_data, available_symbol );
+	    break;
+	default:
+	    log_error( "unidentified state" );
+	    ui_stat = UNIDENTIFIED_STATE;
+	    break;
     }
 
-    *available_symbol = -1;                            // believe, that request was read
+    if( ui_stat != CLOSE_MESSENGER ){
+	echo();
+    }
+    return ui_stat;
+}
+
+ui_stat_t start_menu( int user_choice, user_info_t* user_data ){
+    assert( user_data );
+
     switch( user_choice ){
-        case KEY_F(1):
+	case KEY_F(1):
+  	    return START_CREATE_ROOM;
+	case KEY_F(12):
+	    return leave_app( user_data );
+	default:
+	    return NOTHING_DO;
+    }
+}
+
+ui_stat_t manage_menu( int user_choice, user_info_t* user_data ){
+    assert( user_data );
+
+    switch( user_choice ){
+	case KEY_F(1):
             return START_CREATE_ROOM;
         case KEY_F(2):                                 // join chat
             return START_JOIN_CHAT;
+	case KEY_F(12):
+            return leave_app( user_data );
+	default:
+	    return NOTHING_DO;
+    }
+}
+
+ui_stat_t chat_menu( WINDOW* win, int user_choice, user_info_t* user_data, int* available_symbol ){
+    assert( user_data );
+
+    int x = -1, y = -1;
+    switch( user_choice ){
         case KEY_F(3):                                 // leave chat
             return START_LEAVE_CHAT;
         case KEY_F(4):                                 // room info (/list)
@@ -307,17 +392,22 @@ ui_stat_t parse_request( WINDOW* window, user_info_t* user_data, const bool is_c
             return VIEW_ALL_UNREAD;
         case KEY_F(9):
             return START_SEND_FILE;
-	case KEY_F(10):
-	    return START_RECOGNIZE_PHOTO;
+	//case KEY_F(10):
+	//    return START_RECOGNIZE_PHOTO;
         case KEY_F(12):
             return leave_app( user_data );
         default:
-            break;
+	    if( user_choice != KEY_BACKSPACE ){
+		wechochar( win, user_choice );
+	    }
+	    else {
+	        getyx( win, y, x );
+	        wmove( win, y, x -1 );
+	    }
+            log_warning( "request was not recognized. User choice = %d", user_choice );
+	    *available_symbol = user_choice;                   					// if this is not a request, we saved read char
+	    return READ_MESSAGE;
     }
-
-    log_warning( "request was not recognized. User choice = %d", user_choice );
-    *available_symbol = user_choice;                   // if this is not a request, we saved read char
-    return READ_MESSAGE;
 }
 
 ui_stat_t file_request( WINDOW* window ){
@@ -341,7 +431,7 @@ ui_stat_t file_request( WINDOW* window ){
     else if( upper == 'C' ){
 	return FINISH_DOWNLOAD;
     }
-    return NO_REQUEST;
+    return NOTHING_DO;
 }
 
 ui_stat_t leave_app( user_info_t* user_data ){
@@ -357,7 +447,7 @@ ui_stat_t create_room( room_position_t* room_pos, winsize_t* console_size, char*
     assert( room_pos );
     assert( console_size );
     assert( room_name );
-    
+
     log_info( "room name: %s", room_name );
 
     int nlines = room_pos->nlines, columns = room_pos->ncolumns;
@@ -392,7 +482,7 @@ ui_stat_t create_room( room_position_t* room_pos, winsize_t* console_size, char*
 bool add_chat( char* room_name, WINDOW* chat_win ){
     assert( chat_win );
     assert( room_name );
-    
+
     if( rooms_info.len == INIT_COUNT_ROOMS ){
 	log_warning( "too many rooms" );
 	return false;
@@ -402,7 +492,7 @@ bool add_chat( char* room_name, WINDOW* chat_win ){
     rooms_info.room_names[ rooms_info.len ] = strdup( room_name );
     rooms_info.chat_windows[ rooms_info.len ] = chat_win;
     ++rooms_info.len;
-    
+
     if( name_realloc || chat_realloc ){
 	rooms_info.capacity *= 2;
     }
@@ -450,7 +540,7 @@ ui_stat_t create_room_name_win( winsize_t* console_size, windows_t* windows ){
 
 	// 5 * 42
 	int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
-        int nlines = 0.1 * max_nlines, ncolumns = 0.17 * max_columns;
+        int nlines = 0.15 * max_nlines, ncolumns = 0.17 * max_columns;
         int der_nlines = nlines - 2, der_ncolumns = ncolumns - 2;
         int begin_x = 0.41 * max_columns, begin_y = 0.34 * max_nlines;
         int der_begin_x = 1, der_begin_y = 1;
@@ -488,7 +578,7 @@ ui_stat_t create_room_name_win( winsize_t* console_size, windows_t* windows ){
 ui_stat_t create_manage_menu( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
-    
+
     // (max - 2) * 40
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
     int nlines = max_nlines - 2, ncolumns = 0.17 * max_columns;
@@ -509,11 +599,11 @@ ui_stat_t create_manage_menu( windows_t* windows, winsize_t* console_size ){
     mvwhline( manage_menu, begin_y, begin_x, ACS_HLINE, ncolumns );
 
     begin_y = begin_y + 2;
-    show_option( manage_menu, "*CREATE A NEW CHAT: ", "F1", begin_y );
+    show_option( manage_menu, "*CREATE A NEW CHAT: ", "F1", begin_y, KEY );
     begin_y = begin_y + 2;
-    show_option( manage_menu, "*JOIN THE CHAT: ", "F2", begin_y );
+    show_option( manage_menu, "*JOIN THE CHAT: ", "F2", begin_y, KEY );
     begin_y = begin_y + 2;
-    show_option( manage_menu, "*LEAVE THE MESSENGER: ", "F12", begin_y );
+    show_option( manage_menu, "*LEAVE THE MESSENGER: ", "F12", begin_y, KEY );
 
     box( manage_menu, 0, 0 );
     wrefresh( manage_menu );
@@ -547,7 +637,7 @@ ui_stat_t create_chat_background( windows_t* windows, winsize_t* console_size, c
 ui_stat_t create_chat_name( windows_t* windows, winsize_t* console_size, char* room_name ){
     assert( console_size );
     assert( room_name );
-    
+
     // 4 * 60
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
     int nlines = 0.085 * max_nlines, ncolumns = 0.25 * max_columns;
@@ -607,23 +697,23 @@ ui_stat_t create_chat_menu( windows_t* windows, winsize_t* console_size ){
     mvwhline( chat_menu, begin_y, begin_x, ACS_HLINE, ncolumns );
 
     begin_y += 2;
-    show_option( chat_menu, "*LEAVE THE CHAT: ", "F3", begin_y );
+    show_option( chat_menu, "*LEAVE THE CHAT: ", "F3", begin_y, KEY );
     begin_y += 2;
-    show_option( chat_menu, "*VIEW ROOM INFORMATION: ", "F4", begin_y );
+    show_option( chat_menu, "*VIEW ROOM INFORMATION: ", "F4", begin_y, KEY );
     begin_y += 2;
-    show_option( chat_menu, "*VIEW MESSAGES FOR TODAY: ", "F5", begin_y );
+    show_option( chat_menu, "*VIEW MESSAGES FOR TODAY: ", "F5", begin_y, KEY );
     begin_y += 2;
-    show_option( chat_menu, "*VIEW MESSAGES FROM YESTERDAY: ", "F6", begin_y );
+    show_option( chat_menu, "*VIEW MESSAGES FROM YESTERDAY: ", "F6", begin_y, KEY );
     begin_y += 2;
-    show_option( chat_menu, "*VIEW MESSAGES FOR WEEK: ", "F7", begin_y );
+    show_option( chat_menu, "*VIEW MESSAGES FOR WEEK: ", "F7", begin_y, KEY );
     begin_y += 2;
-    show_option( chat_menu, "*VIEW ALL UNREAD MESSAGES: ", "F8", begin_y );
+    show_option( chat_menu, "*VIEW ALL UNREAD MESSAGES: ", "F8", begin_y, KEY );
     begin_y += 2;
-    show_option( chat_menu, "*SEND FILE: ", "F9", begin_y );
+    show_option( chat_menu, "*SEND FILE: ", "F9", begin_y, KEY );
+    //begin_y += 2;
+    //show_option( chat_menu, "*RECOGNIZE PHOTO: ", "F10", begin_y );
     begin_y += 2;
-    show_option( chat_menu, "*RECOGNIZE PHOTO: ", "F10", begin_y );
-    begin_y += 2;
-    show_option( chat_menu, "*LEAVE THE MESSENGER: ", "F12", begin_y );
+    show_option( chat_menu, "*LEAVE THE MESSENGER: ", "F12", begin_y, KEY );
 
     box( chat_menu, 0, 0 );
     wrefresh( chat_menu );
@@ -679,7 +769,7 @@ ui_stat_t create_history_win( windows_t* windows, winsize_t* console_size ){
 ui_stat_t create_companion_win( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
- 
+
     // 15 * 60
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
     int nlines = 0.25 * max_nlines, ncolumns = 0.25 * max_columns;
@@ -724,7 +814,7 @@ ui_stat_t create_companion_win( windows_t* windows, winsize_t* console_size ){
 ui_stat_t create_user_win( windows_t* windows, winsize_t* console_size ){
     assert( windows );
     assert( console_size );
-    
+
     // 15 * 60
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
     int nlines = 0.25 * max_nlines, ncolumns = 0.25 * max_columns;
@@ -798,7 +888,7 @@ ui_stat_t create_list_win( windows_t* windows, winsize_t* console_size ){
     der_begin_x = 0, der_begin_y = 1;
     mvwhline( der_list_win, der_begin_y, der_begin_x, ACS_HLINE, der_ncolumns );            // ACS_HLINE - for a solid line
     der_begin_y = 2;
-    show_list_option( der_list_win, "CLOSE ROOM INFORMATION: ", "KEY UP", der_begin_y );
+    show_option( der_list_win, "CLOSE ROOM INFORMATION: ", "KEY UP", der_begin_y, OPTION );
     der_begin_x = 0, der_begin_y = 3;
     mvwhline( der_list_win, der_begin_y, der_begin_x, ACS_HLINE, der_ncolumns );            // ACS_HLINE - for a solid line
     wattroff( der_list_win, A_BOLD );
@@ -883,28 +973,16 @@ ui_stat_t file_window( winsize_t* console_size, windows_t* windows, char* info_l
 }
 
 
-void show_option( WINDOW* window, const char* option, const char* key, int begin_y ){
+void show_option( WINDOW* window, const char* option, const char* key, int begin_y, int color ){
     assert( window );
     assert( option );
     assert( key );
 
     int begin_x = 0;
     mvwaddstr( window, begin_y, begin_x, option );
-    wattron( window, COLOR_PAIR( KEY ) );
+    wattron( window, COLOR_PAIR( color ) );
     waddstr( window, key );
-    wattroff( window, COLOR_PAIR( KEY ) );
-}
-
-void show_list_option( WINDOW* window, const char* option, const char* key, int begin_y ){
-    assert( window );
-    assert( option );
-    assert( key );
-
-    int begin_x = 0;
-    mvwaddstr( window, begin_y, begin_x, option );
-    wattron( window, COLOR_PAIR( OPTION ) );
-    waddstr( window, key );
-    wattroff( window, COLOR_PAIR( OPTION ) );
+    wattroff( window, COLOR_PAIR( color ) );
 }
 
 void close_chat_windows( windows_t* windows ){
@@ -948,8 +1026,8 @@ void update_window( WINDOW* win ){
 }
 
 void delete_symbol( size_t* buf_size, WINDOW* window ){
-    assert(buf_size);
-    assert(window);
+    assert( buf_size );
+    assert( window );
 
     log_debug( "buf_size = %lu", *buf_size );
 
@@ -1043,7 +1121,7 @@ void file_accept_request( WINDOW* file_win, char* file_name ){
 
     mvwprintw( file_win, y, x, "THE USER OF THE ROOM WANTS TO SHARE A FILE WITH YOU!\n"
                                "FILE NAME: %s\n", file_name );
-    show_list_option( file_win, "START DOWNLOADING? ", "Y/N", y + 2 );
+    show_option( file_win, "START DOWNLOADING? ", "Y/N", y + 2, OPTION );
 
     wrefresh( file_win );
 }
@@ -1070,7 +1148,7 @@ void download_complete( windows_t* windows ){
     int file_x = 0;
     int file_y = input_line_pos.file_y;
     mvwaddstr( windows->der_file_win, file_y, file_x, "FILE DOWNLOADED SUCCESSFULLY!\n" );
-    show_list_option( windows->der_file_win, "CLOSE NOTIFICATION WINDOW: ", "C", file_y + 1 );
+    show_option( windows->der_file_win, "CLOSE NOTIFICATION WINDOW: ", "C", file_y + 1, OPTION );
 
     wrefresh( windows->der_file_win );
 }
@@ -1082,7 +1160,7 @@ void dispatch_notification( WINDOW* file_win ){
     int file_x = 0;
     int file_y = input_line_pos.file_y;
     mvwprintw( file_win, file_y, file_x, "FILE HAS BEEN SENT SUCCESSFULLY\n");
-    show_list_option( file_win, "CLOSE NOTOFOCATION WINDOW: ", "C", file_y + 1 );
+    show_option( file_win, "CLOSE NOTOFOCATION WINDOW: ", "C", file_y + 1, OPTION );
 
     wrefresh( file_win );
 }

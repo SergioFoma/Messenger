@@ -1,3 +1,4 @@
+#include <ncurses.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -35,6 +36,12 @@ user_info_t* start_registration(){
     console_size = get_console_size();
     windows = create_background( console_size );
     user_data = client_registration( console_size, windows );
+    ui_stat_t ip_stat = get_ip( windows, user_data );
+    if( ip_stat == CLOSE_MESSENGER ){
+	leave_app( user_data );
+	close_messenger( user_data );
+	return NULL;
+    }
     log_info( "IP: %s", user_data->ip );
     close_window( windows->reg_win );
 
@@ -69,7 +76,7 @@ void connect_cb(uv_connect_t* req, int status ){
     }
 
     client->stdin_handle->data = client;
-    client->app_state = MENU;
+    client->app_state = START_MENU;
     int poll_status = uv_poll_init( req->handle->loop, client->stdin_handle, STDIN_FILENO );
     if( poll_status < 0 ){
         log_fatal( "poll init return file description initialization error" );
@@ -185,9 +192,10 @@ void poll_cb( uv_poll_t* handle, int status, int events ){
     client_t* client = (client_t*)handle->data;
     ui_stat_t state = CORRECT_STATE;
     int available_symbol = -1;
-    switch( client->app_state ){
-        case MENU:
-            state = parse_request( windows->menu_win, user_data, CLOSE_WINDOW, &available_symbol );
+    app_state_t app_state = client->app_state;
+    switch( app_state ){
+        case START_MENU:
+            state = parse_request( windows->menu_win, user_data, app_state, &available_symbol );
             check_ui_state( handle, state, client );
             break;
         case GET_ROOM_NAME:
@@ -195,7 +203,7 @@ void poll_cb( uv_poll_t* handle, int status, int events ){
             check_app_state( handle, client );
             break;
         case MANAGE_MENU:
-            state = parse_request( windows->manage_menu_win, user_data, NOT_CLOSE_WINDOW, &available_symbol );
+            state = parse_request( windows->manage_menu_win, user_data, app_state, &available_symbol );
             check_ui_state( handle, state, client );
             break;
         case JOIN_ROOM_NAME:
@@ -203,7 +211,7 @@ void poll_cb( uv_poll_t* handle, int status, int events ){
             check_app_state( handle, client );
             break;
         case USER_ACTION:
-            state = parse_request( windows->der_user_win, user_data, NOT_CLOSE_WINDOW, &available_symbol );
+            state = parse_request( windows->der_user_win, user_data, app_state, &available_symbol );
             check_ui_state( handle, state, client );
             read_key( client, state, handle, &available_symbol );
             break;
@@ -252,8 +260,9 @@ void check_ui_state( uv_poll_t* handle, ui_stat_t state, client_t* client ){
 
     ui_stat_t new_state = CORRECT_STATE;
     switch( state ){
-        case NO_REQUEST:
+        case NOTHING_DO:
             log_warning( "user interface did not detect recognized" );
+	    flushinp();
             break;
         case CLOSE_MESSENGER:
             leave_messenger( (uv_handle_t*)handle );
@@ -665,7 +674,11 @@ void connect_recipient( client_t* client, char* command_line ){
     
     char* first_wh = strchr( command_line, ' ' );
     char* second_wh = strchr( first_wh + 1, ' ' );
+    char* newline = strchr( second_wh + 1, '\n' );
     *second_wh = '\0';
+    if( newline ){
+	*newline = '\0';
+    }
     client->transfer_id = strtoul( first_wh + 1, NULL, DEC );
     char* file_name = strdup( second_wh + 1 );
     client->file_name = file_name;
@@ -686,6 +699,7 @@ void connect_sender( client_t* client ){
     client->client_type = SENDER;				      // SENDER or RECEIVER
 
     log_info( "file path: '%s'", client->sender_path );
+    log_info( "file_name from sender: '%s'", file_name )
 
     clean_scr_buf( client );
     clear_file_line( windows->der_file_win );

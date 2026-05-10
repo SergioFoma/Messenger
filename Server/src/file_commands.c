@@ -189,6 +189,7 @@ size_t init_sender( client_t* client, char* string ){
     *newline = '\0';
 
     char* file_name = first_whitespace + 1;
+    log_debug( "file name in server: '%s'", file_name );
     char* string_file_cap = second_whitespace + 1;
     time_t seconds = time( NULL );						// currect secodns since 1970
     size_t hash_size = strlen( file_name ) + MAX_TIME_LEN + EXTRA_SPACE;

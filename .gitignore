@@ -5,3 +5,4 @@ Application/
 *.cache
 ML/__pycache__
 *.npz
+dev_password.txt

@@ -1,6 +1,7 @@
 #ifndef USER_INTERFACE_H
 #define USER_INTERFACE_H
 
+#include "network_functions.h"
 #include <sys/ioctl.h>                  // winsize
 #include <stdbool.h>
 #include <ncurses.h>
@@ -34,7 +35,11 @@ typedef enum ui_stat_e {                // user interface status
     REQUEST_ACCEPTED        = 25,
     REQUEST_NOT_ACCEPTED    = 26,
     FINISH_DOWNLOAD	    = 27,
-    START_RECOGNIZE_PHOTO   = 28
+    START_RECOGNIZE_PHOTO   = 28,
+    UNIDENTIFIED_STATE      = 29,
+    NOTHING_DO		    = 30,
+    FIN_GET_IP		    = 31,
+    HEAP_ERROR		    = 32
 } ui_stat_t;
 
 typedef enum win_colors_e {
@@ -51,7 +56,8 @@ typedef enum win_colors_e {
     ONE_ROOM        = 11,
     HISTORY_BACK    = 12,
     CHAT_BACK       = 13,
-    OPTION          = 14
+    OPTION          = 14,
+    REG
 } win_colors_t;
 
 typedef struct user_info_s {
@@ -123,6 +129,11 @@ typedef struct main_struct_s {
     user_info_t* user_data;
 } main_struct_t;
 
+typedef struct request_param_s {
+    const bool is_closing;
+    app_state_t app_state;
+} request_param_t;
+
 void init_colors();
 
 winsize_t* get_console_size();
@@ -133,11 +144,19 @@ ui_stat_t create_name_win( winsize_t* console_size, windows_t* windows );
 
 user_info_t* client_registration( winsize_t* console_size, windows_t* windows );
 
+ui_stat_t get_ip( windows_t* windows, user_info_t* user_data );
+
 room_position_t* create_room_list( winsize_t* console_size );
 
 ui_stat_t create_menu( windows_t* windows, winsize_t* console_size );
 
-ui_stat_t parse_request( WINDOW* window, user_info_t* user_data, const bool is_closing, int* available_symbol );
+ui_stat_t parse_request( WINDOW* window, user_info_t* user_data, app_state_t app_state, int* available_symbol );
+
+ui_stat_t start_menu( int user_choice, user_info_t* user_data );
+
+ui_stat_t manage_menu( int user_choice, user_info_t* user_data );
+
+ui_stat_t chat_menu( WINDOW* win, int user_choice, user_info_t* user_data, int* available_symbol );
 
 ui_stat_t file_request( WINDOW* window );
 
@@ -197,9 +216,7 @@ void clear_file_line( WINDOW* win );
 
 ui_stat_t check_connect_possibility( char* room_name );
 
-void show_option( WINDOW* window, const char* option, const char* key, int begin_y );
-
-void show_list_option( WINDOW* window, const char* option, const char* key, int begin_y );
+void show_option( WINDOW* window, const char* option, const char* key, int begin_y, int color );
 
 void show_companion_message( windows_t* windows, char* companion_message, size_t nread );
 

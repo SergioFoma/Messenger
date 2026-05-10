@@ -6,7 +6,7 @@
 
 typedef enum app_state_e {
     UNDEFINED                   =   0,
-    MENU                        =   1,
+    START_MENU                  =   1,
     GET_ROOM_NAME               =   2,
     CREATE_ROOM                 =   3,
     MANAGE_MENU                 =   4,

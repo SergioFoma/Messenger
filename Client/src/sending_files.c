@@ -22,7 +22,7 @@ static const unsigned int BUFFERS_COUNT = 1;         // for uv_fs_write
 static const int64_t CURRENT_FILE_PTR = -1;          // for uv_fs_writ
 static const size_t DEC = 10;			     // for strtoul
 static const long MIN_COMMAND_SIZE = 3;
-static const size_t PART_SIZE = 8192;		     // the file will be sent in parts of 1024 bytes
+static const size_t PART_SIZE = 8192;		     // the file will be sent in parts of 8192 bytes
 static const size_t MAX_DIGITS = 100;		     // for snprintf
 
 // global vars for user interface

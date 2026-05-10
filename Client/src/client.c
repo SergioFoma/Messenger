@@ -23,8 +23,10 @@ int main( int argc, char** argv ){
 
     open_log_file( argv[1] );                                                                       // open file for logging (logger.h)
     user_info_t* user_data = start_registration();                                                  // user registration
+    if( !user_data ){
+	return 0;
+    }
     
-
     uv_loop_t* loop = uv_default_loop();                                                            // init main cycle
     uv_tcp_t client_socket = {};
     uv_tcp_init( loop, &client_socket );                                                            // init descriptor, but not make socket
