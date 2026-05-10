@@ -102,6 +102,13 @@ void send_file_information( client_t* client ){
     
     if( get_file_size( client ) != NORMAL_WORK ){
 	log_error( "error of getting file size" );
+	client->stopped_file_ch = true;
+	close_file_windows( windows );
+	uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
+	if( uv_shutdown( shutdown_req, (uv_stream_t*)client->file_handle, disconnect_cb ) < 0 ){
+	    free( shutdown_req );
+	    log_error( "RECEIVER: shutdown return negative value" );
+	}	
 	return ;
     }
     log_debug( "client file name = '%s', client file cap = %lu", client->file_name, client->file_capacity );

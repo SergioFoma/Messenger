@@ -1179,6 +1179,9 @@ void close_file_windows( windows_t* windows ){
 
     close_window( windows->der_file_win );
     close_window( windows->file_win );
+ 
+    windows->der_file_win = NULL;
+    windows->file_win = NULL;
 
     update_chat_windows( windows );
 }

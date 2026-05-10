@@ -193,6 +193,7 @@ void poll_cb( uv_poll_t* handle, int status, int events ){
     ui_stat_t state = CORRECT_STATE;
     int available_symbol = -1;
     app_state_t app_state = client->app_state;
+    log_debug( "app state = %d", app_state )
     switch( app_state ){
         case START_MENU:
             state = parse_request( windows->menu_win, user_data, app_state, &available_symbol );
@@ -228,6 +229,16 @@ void poll_cb( uv_poll_t* handle, int status, int events ){
         case WRITE_HISTORY:
             break;
         case FILE_REQUEST:
+	    if( !windows->der_file_win || !windows->file_win ){
+		log_debug( "in if" );
+		client->app_state = USER_ACTION;
+		state = parse_request( windows->der_user_win, user_data, USER_ACTION, &available_symbol );
+		check_ui_state( handle, state, client );
+                read_key( client, state, handle, &available_symbol );
+		client->stopped_file_ch = false;
+		break;
+	    }
+	    log_debug( "after if" );
             state = file_request( windows->der_file_win );
             check_ui_state( handle, state, client );
             break;
