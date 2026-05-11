@@ -10,9 +10,17 @@
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
-[INFO] File: src/user_interface.c , function: create_room , line 451, message: room name: seregha
-[DEBUG] File: src/user_interface.c , function: add_chat , line 500, message: added room: seregha
+[INFO] File: src/user_interface.c , function: create_room , line 451, message: room name: check
+[DEBUG] File: src/user_interface.c , function: add_chat , line 500, message: added room: check
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 4
-[INFO] File: src/callbacks.c , function: check_ui_state , line 280, message: user close messenger
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
+[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 263, message: current name = 'check', room name = 'check'
+[INFO] File: src/user_interface.c , function: check_connect_possibility , line 265, message: room was found
+[INFO] File: src/callbacks.c , function: join_room , line 403, message: client join room: check
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 667, message: check
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 673, message: CHECK
