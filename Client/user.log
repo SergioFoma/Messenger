@@ -1,8 +1,6 @@
 [INFO] File: src/logger.c , function: open_log_file , line 13, message: success open log file
-[INFO] File: src/user_interface.c , function: get_console_size , line 52, message: default console size: nlines = 59, ncolumns = 248
-[DEBUG] File: src/user_interface.c , function: delete_symbol , line 1032, message: buf_size = 12
-[INFO] File: src/user_interface.c , function: delete_symbol , line 1046, message: delete one symbol
-[INFO] File: src/callbacks.c , function: start_registration , line 45, message: IP: 192.168.1.105
+[INFO] File: src/user_interface.c , function: get_console_size , line 52, message: default console size: nlines = 61, ncolumns = 248
+[INFO] File: src/callbacks.c , function: start_registration , line 45, message: IP: 80.87.201.176
 [INFO] File: src/client.c , function: main , line 53, message: loop start ... 
 [INFO] File: src/callbacks.c , function: connect_cb , line 92, message: read start
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 1
@@ -11,88 +9,28 @@
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
-[INFO] File: src/user_interface.c , function: create_room , line 451, message: room name: file
-[DEBUG] File: src/user_interface.c , function: add_chat , line 500, message: added room: file
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[INFO] File: src/user_interface.c , function: create_room , line 451, message: room name: first
+[DEBUG] File: src/user_interface.c , function: add_chat , line 500, message: added room: first
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 4
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 2
+[INFO] File: src/user_interface.c , function: create_room , line 451, message: room name: second
+[DEBUG] File: src/user_interface.c , function: add_chat , line 500, message: added room: second
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 4
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
 [DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
-[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 263, message: current name = 'file', room name = 'file'
+[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 5
+[DEBUG] File: src/user_interface.c , function: check_connect_possibility , line 263, message: current name = 'first', room name = 'first'
 [INFO] File: src/user_interface.c , function: check_connect_possibility , line 265, message: room was found
-[INFO] File: src/callbacks.c , function: join_room , line 403, message: client join room: file
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 667, message: file
-[INFO] File: src/user_interface.c , function: make_uppercase_line , line 673, message: FILE
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/user_interface.c , function: delete_symbol , line 1032, message: buf_size = 19
-[INFO] File: src/user_interface.c , function: delete_symbol , line 1046, message: delete one symbol
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/user_interface.c , function: delete_symbol , line 1032, message: buf_size = 18
-[INFO] File: src/user_interface.c , function: delete_symbol , line 1046, message: delete one symbol
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 12
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 500, message: get file name: home/foma/govno.txt
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 500, message: get file name: foma/govno.txt
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 500, message: get file name: govno.txt
-[DEBUG] File: src/callbacks.c , function: get_file_name , line 503, message: file name from path: govno.txt
-[INFO] File: src/callbacks.c , function: connect_sender , line 712, message: file path: '/home/foma/govno.txt'
-[INFO] File: src/callbacks.c , function: connect_sender , line 713, message: file_name from sender: 'govno.txt'
-[INFO] File: src/sending_files.c , function: open_new_connection , line 72, message: successfully connected to file chanel
-[INFO] File: src/sending_files.c , function: get_file_size , line 334, message: sender path before stat: /home/foma/govno.txt
-[FATAL] File: src/sending_files.c , function: get_file_size , line 337, message: client_type = 1, stat returned negative value
-[ERROR] File: src/sending_files.c , function: send_file_information , line 104, message: error of getting file size
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 15
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 233, message: in if
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 119
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 101
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 108
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 108
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 111
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 10
-[INFO] File: src/callbacks.c , function: send_message , line 511, message: client send message: wello
-[DEBUG] File: src/callbacks.c , function: show_server_message , line 629, message: Message from server = 'nice
-'
-[WARNING] File: src/callbacks.c , function: find_srv_command , line 678, message: command was not found
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 99
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 111
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 111
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 108
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 33
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 33
-[DEBUG] File: src/callbacks.c , function: poll_cb , line 196, message: app state = 7
-[WARNING] File: src/user_interface.c , function: chat_menu , line 407, message: request was not recognized. User choice = 10
-[INFO] File: src/callbacks.c , function: send_message , line 511, message: client send message: cool!!
+[INFO] File: src/callbacks.c , function: join_room , line 403, message: client join room: first
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 667, message: first
+[INFO] File: src/user_interface.c , function: make_uppercase_line , line 673, message: FIRST

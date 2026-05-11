@@ -113,9 +113,7 @@ void read_file_ch( uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf ){
     }
 
     log_warning( "client closed file channel" );
-    uv_shutdown_t* shutdown_req = (uv_shutdown_t*)calloc( ONE, sizeof(uv_shutdown_t) );
     if( !uv_is_closing( (uv_handle_t*)handle )  ){
-	free( shutdown_req );
 	uv_close( (uv_handle_t*)handle, finish_cb );
 	return ;
     }

@@ -89,6 +89,4 @@ typedef struct main_connection_s {
     client_t* client;
 } main_connection_t;
 
-
-
 #endif

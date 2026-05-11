@@ -11,7 +11,7 @@
 #include "user_interface.h"
 
 const size_t ONE = 1;
-const size_t MAX_IP_LEN = 20;
+const size_t MAX_IP_LEN = 15;
 const size_t MAX_NAME_LEN = 30;
 const size_t INIT_COUNT_ROOMS = 5;
 const int ROOM_NLINES = 5;
@@ -155,7 +155,7 @@ ui_stat_t get_ip( windows_t* windows, user_info_t* user_data ){
     assert( windows );
 
     WINDOW* reg_win = windows->reg_win;
-    char* ip = (char*)calloc( MAX_IP_LEN, sizeof(char) );
+    char* ip = (char*)calloc( MAX_IP_LEN + 1, sizeof(char) );
     if( !ip ){
 	log_fatal( "error of gettig ip address" );
 	wattroff( reg_win, BOLD );
@@ -165,7 +165,7 @@ ui_stat_t get_ip( windows_t* windows, user_info_t* user_data ){
 
     int symbol = 0;
     size_t index = 0;
-    while( ( symbol = wgetch( reg_win ) ) != '\n' ){
+    while( index < MAX_IP_LEN && ( symbol = wgetch( reg_win ) ) != '\n' ){
 	if(  symbol == KEY_F(12) ){
 	    wattroff( reg_win, BOLD );
 	    return CLOSE_MESSENGER;
