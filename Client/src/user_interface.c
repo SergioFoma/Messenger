@@ -90,7 +90,7 @@ ui_stat_t create_name_win( winsize_t* console_size, windows_t* windows ){
     int begin_y = 0, begin_x = 0;
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
 
-    nlines = 0.07 * max_nlines, ncolumns = 0.3 * max_columns, begin_x = 0.361 * max_columns, begin_y = 0;
+    nlines = 0.1 * max_nlines, ncolumns = 0.3 * max_columns, begin_x = 0.361 * max_columns, begin_y = 0;
     WINDOW* name_win = newwin( nlines, ncolumns, begin_y, begin_x );
     if( name_win == NULL ){
         log_fatal( "window with messenger name is null ptr\n" );
@@ -640,7 +640,7 @@ ui_stat_t create_chat_name( windows_t* windows, winsize_t* console_size, char* r
 
     // 4 * 60
     int max_nlines = console_size->ws_row, max_columns = console_size->ws_col;
-    int nlines = 0.085 * max_nlines, ncolumns = 0.25 * max_columns;
+    int nlines = 0.01 * max_nlines, ncolumns = 0.25 * max_columns;
     int begin_y = 0, begin_x = 0.41 * max_columns ;
     WINDOW* name_win = newwin( nlines, ncolumns, begin_y, begin_x );
     if( name_win == NULL ){
